@@ -1,0 +1,27 @@
+# -*- mode: sh; -*-
+# ~/.bash_env: sourced by bashrc for non-login shells.
+# defines environment variables
+
+# Custom user-define environment variables
+export EDITOR
+EDITOR=vim
+
+# Hugging Face
+export HF_HOME
+HF_HOME="/mnt/extra/.cache/huggingface"
+
+export HF_HUB_CACHE
+HF_HUB_CACHE="$HF_HOME/hub"
+
+DEBEMAIL="johndevlopment7@gmail.com"
+DEBFULLNAME="John Russell"
+export DEBEMAIL DEBFULLNAME
+
+export HOMEBREW_AUTO_UPDATE_SECS
+HOMEBREW_AUTO_UPDATE_SECS=120
+
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+# For my 'find' shell function
+export FIND_REGEX_TYPE
+FIND_REGEX_TYPE="posix-extended"

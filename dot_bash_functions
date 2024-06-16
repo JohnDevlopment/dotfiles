@@ -1,0 +1,427 @@
+# -*- mode: sh; -*-
+
+## usage: find [STARTING-POINT ...] [FIND-OPTIONS]
+# function find {
+#     local find=$(which find)
+#     local paths=()
+#     local arg
+#     local preopts=()
+#     local optwitharg
+#     local expressions=()
+#     local regextype=()
+
+#     ## usage: dprint MSG [MSG ...]
+#     function dprint {
+# 	local msg="${1:?missing MSG}"
+# 	shift
+# 	if [ ${DEBUG:-0} -ne 0 ]; then
+# 	    echo "DEBUG: $msg" "$@"
+# 	fi
+#     }
+
+#     # Process args
+#     for arg; do
+# 	if [ -n "$optwitharg" ]; then
+# 	    # Is the argument to an option
+# 	    shift
+# 	    preopts+=("$optwitharg" "$arg")
+# 	    echo "Preoption:" "$optwitharg" "$arg"
+# 	    optwitharg=
+# 	    continue
+# 	fi
+
+# 	case "$arg" in
+# 	    -O[123])
+# 		# Optimization level
+# 		shift
+# 		preopts+=("$arg")
+# 		;;
+# 	    -O*)
+# 		shift
+# 		;;
+# 	    -H|-L|-P)
+# 		# Flags that precede any paths
+# 		shift
+# 		preopts+=("$arg")
+# 		;;
+# 	    -D)
+# 		# Debug option
+# 		shift
+# 		optwitharg="$arg"
+# 		;;
+# 	    -*)
+# 		expressions+=("$arg")
+# 		;;
+# 	    *)
+# 		# Nothing
+# 	esac
+#     done
+#     unset arg optwitharg
+
+#     if [ -n "$FIND_REGEX_TYPE" ]; then
+# 	regextype=(-regextype "$FIND_REGEX_TYPE")
+#     fi
+
+#     local opts=("$@")
+    
+#     # $find "${preopts[@]}" "${paths[@]}" "${regextype[@]}" "${opts[@]}" ||
+#     # echo $find "${preopts[@]@Q}" "${paths[@]@Q}" "${regextype[@]}" "${opts[@]@Q}"
+
+#     unset -f dprint
+# }
+
+## usage: rm [-i] [FILE ...]
+function rm {
+    local interactive=0
+
+    while getopts :i OPT; do
+	case $OPT in
+	    i)
+		interactive=1
+		;;
+	    *)
+		echo "usage: ${0##*/} [-i] [--] FILE ..."
+		return 2
+	esac
+    done
+    shift $(( OPTIND - 1 ))
+    OPTIND=1
+
+    if (( interactive != 0 )); then
+	local file confirmation
+	for file; do
+	    echo "Removing '$file'..."
+	    read -p "Confirm? {y/n} [n] " confirmation
+	    if [ "$confirmation" = "y" ]; then
+		trash -v "$file"
+	    fi
+	    echo
+	done
+    else
+	trash -v "$@"
+    fi
+}
+
+function _midentify {
+    local infile="${1?no input file provided}"
+    mplayer -identify -frames 0 -vo null -ao null "$infile" 2>&1 | sed -n 's/^ID_//p'
+}
+
+## usage: lsdirs [-qh]
+function lsdirs {
+    local i=0
+    local opt=
+    local quotes=1
+
+    # Options
+    for opt; do
+	case "$opt" in
+	    -q|--no-quotes)
+		quotes=0
+		;;
+	    -h|--help)
+		echo "lsdirs [-q|--no-quotes] [DIR]"
+		return `true`
+		;;
+	    *)
+		;;
+	esac
+	i+=1
+    done
+    shift $i
+
+    local res=$(dir -1dAQ */ .*/ | sed -r -e 's_^"\.{1,2}/"__g' -e 's_/"$_"_g' | sed -z 's_\n\n__')
+
+    if [ $quotes -eq 0 ]; then
+	echo "$res" | sed 's/"//g'
+    else
+	echo "$res"
+    fi
+}
+
+function set-title {
+    if [[ -z "$ORIG" ]]; then
+	ORIG=$PS1
+    fi
+    TITLE="\[\e]2;$*\a\]"
+    PS1=${ORIG}${TITLE}
+}
+
+function backup_git {
+    local repo=${1:?missing repo}
+    jcompress -r -v "$@" $repo.tar.gz $repo
+}
+
+function randstr {
+    local len=${1:?no length}
+    expr $len + 1 &>/dev/null || {
+	echo -e "invalid length\n"
+    }
+
+    LC_ALL=C tr -dc A-Za-z0-9 </dev/urandom | head -c $len
+}
+
+function __venv {
+    local cmd="source"
+    if [ -d ".venv" ]; then
+	echo -en "$cmd .venv/bin/activate"
+    elif [ -d ".env" ]; then
+	echo -en "$cmd .env/bin/activate"
+    else
+	echo "no .venv or .env directory present" >&2
+	false
+    fi
+}
+
+## usage: detect_stdin
+## returns: "Pipe: pipe:[<pid>]" if is pipe, "Terminal: <path>" if terminal, else "Unknown: <path>"
+function detect_stdin {
+    local stdin ftype
+
+    stdin=$(ls -la /proc/self/fd/0)
+    stdin="${stdin/*-> /}"
+
+    if [[ $stdin =~ [pP]ipe.* ]]; then
+	# Is a pipe
+	echo "Pipe: $stdin"
+    else
+	# Is a terminal or something else
+	ftype="$(stat --printf=%F $stdin)"
+	if [ "$ftype" = 'character special file' ]; then
+	    echo "Terminal: $stdin"
+	else
+	    echo "Unknown: $stdin"
+	fi
+    fi
+}
+
+## usage: subshell [-h] [-H] [-i FILE]
+function subshell {
+    # Usage
+    local USAGE="usage: subshell [-H] [-i INPUTFILE]"
+
+    # Parse options
+    local OPT OPTARG OPTIND
+    local input=
+    local history=1
+    while getopts :Hi: OPT; do
+	case $OPT in
+	    H)
+		history=0
+		;;
+	    i)
+		input="$OPTARG"
+		;;
+	    *)
+		echo "$USAGE"
+		return 2
+	esac
+    done
+    shift $(( OPTIND - 1 ))
+    OPTIND=1
+
+    # Create temp directory
+    local tmpdir=$(mktemp -d)
+
+    # Make script. This is the base script that simply
+    # sets up the environment.
+    local script="$tmpdir/script.sh"
+
+    cat >$script <<EOF
+. /etc/bash.bashrc
+. $HOME/.bashrc
+PS1="(subshell) \$PS1"
+export PS1
+EOF
+
+    # If .bash_history exists, use it as the history file
+    if [ $history -ne 0 ] && [ -f "$PWD/.bash_history" ]; then
+	cat >> $script <<EOF
+history -c
+HISTFILE="$PWD/.bash_history"
+export HISTFILE
+EOF
+    elif [ $history -eq 0 ]; then
+	# If .bash_history does not exist
+	# and -H flag is set
+	local null=/dev/null
+	cat >> $script <<EOF
+history -c
+HISTFILE="$null"
+export HISTFILE
+EOF
+    fi
+
+    # Detect if $input is a file
+    if [ -f "$input" ]; then
+	# Source file
+	local temp=$(realpath $input)
+	input=". \"$temp\""
+	echo "$input" >> $script
+    else
+	# Detect if stdin is either a pipe or the terminal
+	local temp=$(detect_stdin)
+	case "$temp" in
+	    Pipe:*)
+		while read line; do
+		    echo "$line" >> $script
+		done
+		;;
+	    *)
+	esac
+    fi
+
+    local debug=${DEBUG:-0}
+    if [ $debug -ne 0 ]; then
+	# Debug mode
+	cat $script
+	rm -rfv "$tmpdir"
+    else
+	# Execute subshell
+	echo rm -rf $tmpdir | at now + 1 minute &> /dev/null
+	bash --rcfile $script
+    fi
+}
+
+## usage: gi LANG
+function gi {
+    curl -sL "https://www.toptal.com/developers/gitignore/api/$1"
+}
+
+## usage: remount_usb
+function remount_usb {
+    local name
+    select name in backup_usb EF50-9BCA; do
+	break
+    done
+
+    local chmod=${1:+}
+
+    case $name in
+	backup_usb)
+	    sudo umount /media/john/$name
+	    sudo mount /dev/sdc /mnt/usb
+	    ;;
+	EF50-9BCA)
+	    sudo umount /media/john/$name
+	    sudo mount -o uid=1000,gid=1000 /dev/sdc /mnt/usb
+	    ;;
+	*)
+	    echo "Unknown name '$name'" >&2
+	    return 1
+    esac
+}
+
+## usage: screen-units NUM [from|to] UNIT
+## examples:
+##     (cm to pixels) $ screen-units 5.02 from cm
+##     (pixels to cm) $ screen-units 748 to cm
+## constants:
+##     CM_PX_RATIO=2.54
+##     PPI=96
+function screen-units {
+    local num="$1"
+    local keyword="$2"
+    local unit="$3"
+
+    # define constants
+    local CM_PX_RATIO=2.54
+    local PPI=96
+
+    # cm = (px / PPI) * 2.54
+
+    # error if any of the arguments are empty
+    if [[ -z $num || -z $keyword || -z $unit ]]; then
+	local args=$(printf "%s," "$@" | sed 's/,$//')
+	local expected="NUM from|to UNIT"
+	echo "screen-units ERROR: missing argument; args: ($args), expected: $expected" >&2
+	return 1
+    fi
+
+    # error if $num is not a valid number
+    if [[ ! $num =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+	echo "screen-units ERROR: invalid number '$num'" >&2
+	return 1
+    elif [[ ! $keyword =~ ^(to|from)$ ]]; then
+	echo "screen-units ERROR: invalid argument '$keyword', must be 'to' or 'from'" >&2
+	return 1
+    elif [[ ! $unit =~ ^cm$ ]]; then
+	echo "screen-units ERROR: invalid unit '$unit', can be 'cm'" >&2
+	return 1
+    fi
+
+    local args=($num $keyword $unit)
+    case "${args[@]}" in
+	*from\ cm)
+	    # from cm to pixels
+	    bc <<< "scale=4; $num * ($PPI / $CM_PX_RATIO)"
+	    ;;
+	*to\ cm)
+	    # from pixels to cm
+	    bc <<< "scale=4; ($num / $PPI.0) * $CM_PX_RATIO"
+	    ;;
+	*)
+	    echo "screen-units ERROR: can only convert from cm to pixels" >&2
+	    return 1
+    esac
+}
+
+## usage: mpp FILE2 FILE2
+##        mpp -t DIRECTORY FILE ...
+function mpp {
+    local cmd
+
+    cmd=(cp -- "$1" "$2")
+
+    local awkcmd=$(cat <<EOF
+{
+	count += \$NF
+	if (count % 10 == 0) {
+	   percent = count / total_size * 100
+	   printf "%3d%% [", percent
+	   for (i=0; i<=percent; i++)
+	       printf "="
+	   printf ">"
+	   for (i=percent; i<100; i++)
+	       printf " "
+	   printf "]\r"
+	}
+}
+	END { print "" }
+EOF
+	  )
+
+    strace -q -ewrite "${cmd[@]}" 2>&1 |
+	awk "$awkcmd" total_size=$(stat -c '%s' "$1") count=0
+
+    /usr/bin/rm -v "$1"
+}
+
+# Copy file with a progress bar
+## usage: cpp [-m] FILE1 FILE2
+function cpp {
+    local move=0
+    if [[ $1 = -m ]]; then
+	move=1
+	shift
+    fi
+
+    set -e
+    strace -q -ewrite cp -- "${1}" "${2}" 2>&1 |
+	awk '{
+	count += $NF
+	if (count % 10 == 0) {
+		percent = count / total_size * 100
+		printf "%3d%% [", percent
+		for (i=0;i<=percent;i++)
+			printf "="
+			printf ">"
+			for (i=percent;i<100;i++)
+				printf " "
+				printf "]\r"
+			}
+		}
+	END { print "" }' total_size="$(stat -c '%s' "${1}")" count=0
+}
+
+# . /usr/bin/env_parallel.bash

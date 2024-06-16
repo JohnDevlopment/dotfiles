@@ -1,0 +1,17 @@
+#!/bin/bash
+
+alias blesh="unalias blesh; source ~/.local/share/blesh/ble.sh; bleopt history_share=1; source ~/src/atuin; ble-import -d integration/fzf-key-bindings"
+alias delete=$(which rm)
+alias dquilt="quilt --quiltrc=${HOME}/.quiltrc-dpkg"
+alias dtail='sudo docker logs -tf --tail="50" "$@"'
+alias emc="emacsclient -c"
+alias list-user-functions="cat ~/.bash_functions | grep -E '[a-zA-Z_-]+\(\)' | sed -E 's/(.*)\(\).*/\1/'"
+alias ll-dirsizes='lsdirs -q | while read dir; do du -sh "$dir"; done'
+alias ll-sizes="ll -h | awk '{ print \$5, \$9; }' | tail -n +4 | sort -h | column -t -s ' '"
+alias midentify=_midentify
+alias opamload="unalias opamload; eval \$(opam env)"
+alias sshload="`ssh-agent.sh` unalias sshload"
+alias tenacity="flatpak run org.tenacityaudio.Tenacity"
+alias venv="__venv | xclip -sel c"
+
+. ~/bin/.nonpath/mc.sh
