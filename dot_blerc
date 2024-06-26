@@ -1,0 +1,4 @@
+# -*- mode: sh; -*-
+
+ble-sabbrev "~extra"=/mnt/extra
+ble-sabbrev emc="emacsclient -c"
