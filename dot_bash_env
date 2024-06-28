@@ -6,6 +6,9 @@
 export EDITOR
 EDITOR=vim
 
+export VISUAL
+VISUAL=$EDITOR
+
 # Hugging Face
 export HF_HOME
 HF_HOME="/mnt/extra/.cache/huggingface"
@@ -25,3 +28,7 @@ eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 # For my 'find' shell function
 export FIND_REGEX_TYPE
 FIND_REGEX_TYPE="posix-extended"
+
+# Useful for Git commands
+export GITHUB_USERNAME
+GITHUB_USERNAME=JohnDevlopment
