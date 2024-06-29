@@ -1,6 +1,14 @@
 #!/bin/bash
 
-alias blesh="unalias blesh; source ~/.local/share/blesh/ble.sh; bleopt history_share=1; source ~/src/atuin; ble-import -d integration/fzf-key-bindings; source ~/.blerc"
+blesh=$(cat <<EOF
+unalias blesh;
+source ~/.local/share/blesh/ble.sh;
+bleopt history_share=1;
+source ~/src/atuin;
+source ~/.blerc
+EOF
+     )
+alias blesh=$(echo "$blesh" | tr "\n" " "); unset blesh
 alias cat=bat
 alias delete=$(which rm)
 alias dquilt="quilt --quiltrc=${HOME}/.quiltrc-dpkg"
