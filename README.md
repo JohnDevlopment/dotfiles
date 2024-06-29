@@ -42,7 +42,7 @@ This command will clone this repository into `~/.local/share/chezmoi`. When you 
 
 After you provide all that information, a config file is generated: `~/.config/chezmoi/chezmoi.toml`. From there, you can start installing the dot files.
 
-Firstly, I would recommend installing `~/.bashrc`. This file will not produce any errors when you source it; however, there are components that get loaded only when their respective files/directories exist. They are:
+Firstly, I would recommend installing `~/.bashrc`. This file will not produce any errors when you source it. However, some of its components only get loaded when their respective files/directories exist. In order, they are:
 
 1. `~/.bash_aliases`
 2. `~/.bash_functions`
@@ -50,9 +50,9 @@ Firstly, I would recommend installing `~/.bashrc`. This file will not produce an
 4. `~/.bash_env`
 5. `~/.cargo/env` - Rust environment
 
-These files are *conditionally loaded*, that is, loaded if they exist. Aside from that, there is a section for loading zoxide.
+These files are *conditionally loaded*, that is, loaded if they exist.
 
-To install zoxide, their recommended way is this:
+After those are loaded, there is a section for loading zoxide. The recommended way to install zoxide is this:
 
 ```sh
 curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
@@ -63,14 +63,14 @@ Alternatively, you can use a package manager (instructions can be found [here][Z
 Once you are ready, type:
 
 ```sh
-# check differences before applying
-chezmoi diff ~/.bashrc
-
-# apply changes
 chezmoi apply ~/.bashrc
 ```
 
-As seen above, you can preview the changes before applying them.
+You can preview the changes before applying them. Type:
+
+```sh
+chezmoi diff ~/.bashrc
+```
 
 ## External Links
 
