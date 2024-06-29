@@ -146,7 +146,7 @@ if [ -f ~/.cargo/env ]; then
    . ~/.cargo/env
 fi
 
-{{ if lookPath "zoxide" }}
+{{- if lookPath "zoxide" }}
 # Zoxide
-eval "$(zoxide init --cmd cd bash)"
+eval "$(zoxide init --cmd {{ .zoxideCmd }} bash)"
 {{ end }}
