@@ -1,6 +1,7 @@
 #!/bin/bash
 
 alias blesh="unalias blesh; source ~/.local/share/blesh/ble.sh; bleopt history_share=1; source ~/src/atuin; ble-import -d integration/fzf-key-bindings; source ~/.blerc"
+alias cat=bat
 alias delete=$(which rm)
 alias dquilt="quilt --quiltrc=${HOME}/.quiltrc-dpkg"
 alias dtail='sudo docker logs -tf --tail="50" "$@"'
