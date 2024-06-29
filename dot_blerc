@@ -1,4 +1,5 @@
 # -*- mode: sh; -*-
 
+ble-import -d integration/fzf-key-bindings
 ble-sabbrev "~extra"=/mnt/extra
 ble-sabbrev emc="emacsclient -c"
