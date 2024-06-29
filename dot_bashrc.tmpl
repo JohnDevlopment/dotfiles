@@ -124,14 +124,13 @@ if ! shopt -oq posix; then
   . ~/.bash_completions
 fi
 
-. ~/.yt-dlp
-
 if [ -r ~/.bash_profile ]; then
     echo 'export GPG_TTY=$(tty)' >> ~/.bash_profile
 else
     echo 'export GPG_TTY=$(tty)' >> ~/.profile
 fi
 
+# Custom environment
 . ~/.bash_env
 
 # Rust environment
@@ -143,6 +142,3 @@ fi
 # Zoxide
 eval "$(zoxide init --cmd cd bash)"
 {{ end }}
-
-# Fzf key bindings
-# source /usr/share/doc/fzf/examples/key-bindings.bash
