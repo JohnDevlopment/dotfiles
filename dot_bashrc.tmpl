@@ -137,7 +137,9 @@ else
 fi
 
 # Custom environment
-. ~/.bash_env
+if [ -f ~/.bash_env ]; then
+    . ~/.bash_env
+fi
 
 # Rust environment
 if [ -f ~/.cargo/env ]; then
