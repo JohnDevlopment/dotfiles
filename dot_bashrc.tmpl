@@ -134,7 +134,10 @@ fi
 
 . ~/.bash_env
 
-. "$HOME/.cargo/env"
+# Rust environment
+if [ -f ~/.cargo/env ]; then
+   . ~/.cargo/env
+fi
 
 {{ if lookPath "zoxide" }}
 # Zoxide
