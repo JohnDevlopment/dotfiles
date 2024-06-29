@@ -136,8 +136,10 @@ fi
 
 . "$HOME/.cargo/env"
 
+{{ if lookPath "zoxide" }}
 # Zoxide
 eval "$(zoxide init --cmd cd bash)"
+{{ end }}
 
 # Fzf key bindings
 # source /usr/share/doc/fzf/examples/key-bindings.bash
