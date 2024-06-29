@@ -1,7 +1,7 @@
 machine api.wandb.ai
-  login {{ pass "wandb.user" }}
+  login {{ .wandbUser }}
   password {{ pass "wandb" }}
 
 machine twitter
-  login {{ pass "twitter.user" }}
+  login {{ .twitterUser }}
   password {{ pass "twitter" }}
