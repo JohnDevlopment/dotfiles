@@ -1,0 +1,12 @@
+{{ $zoxideCmd := promptStringOnce . "zoxideCmd" "Zoxide Command" "cd" -}}
+{{ $gitEmail := promptStringOnce . "gitEmail" "Git User Email" -}}
+{{- $gitUser := promptStringOnce . "gitUser" "Git User" -}}
+{{- $wandbUser := promptStringOnce . "wandbUser" "Wandb User" -}}
+{{- $twitterUser := promptStringOnce . "twitterUser" "Twitter User" -}}
+
+[data]
+zoxideCmd = {{ $zoxideCmd | quote }}
+gitEmail = {{ $gitEmail | quote }}
+gitUser = {{ $gitUser | quote }}
+wandbUser = {{ $wandbUser | quote }}
+twitterUser = {{ $twitterUser | quote }}
