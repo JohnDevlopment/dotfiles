@@ -125,9 +125,13 @@ if ! shopt -oq posix; then
 fi
 
 if [ -r ~/.bash_profile ]; then
-    echo 'export GPG_TTY=$(tty)' >> ~/.bash_profile
+    if ! grep 'export GPG_TTY' ~/.bash_profile &> /dev/null; then
+	echo 'export GPG_TTY' >> ~/.bash_profile
+    fi
 else
-    echo 'export GPG_TTY=$(tty)' >> ~/.profile
+    if ! grep 'export GPG_TTY' ~/.profile &> /dev/null; then
+	echo 'export GPG_TTY' >> ~/.profile
+    fi
 fi
 
 # Custom environment
