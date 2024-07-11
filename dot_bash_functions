@@ -161,6 +161,20 @@ function randstr {
     LC_ALL=C tr -dc A-Za-z0-9 </dev/urandom | head -c $len
 }
 
+## usage: __emc_view FILE
+function __emc_view {
+    local file="${1:?missing FILE}"
+    if [[ ! -f $file ]]; then
+	echo "'$file' does not exist" >&2
+	return 1
+    fi
+    file=$(realpath "$file")
+    local fbase=$(basename "$file")
+
+    local command="(progn (require 'server-view-ext) (server-ext-view-file \"$file\"))"
+    echo emacsclient -c --eval "${command@Q}"
+}
+
 function __venv {
     local cmd="source"
     if [ -d ".venv" ]; then
@@ -395,6 +409,17 @@ EOF
 	awk "$awkcmd" total_size=$(stat -c '%s' "$1") count=0
 
     /usr/bin/rm -v "$1"
+}
+
+## usage: apply COMMAND ARG ...
+function apply {
+    local command="${1:?missing COMMAND}"
+    local arg="${2:?missing ARG}"
+    shift 2
+
+    for arg in "$arg" "$@"; do
+	eval "$command" "$arg"
+    done
 }
 
 # Copy file with a progress bar
