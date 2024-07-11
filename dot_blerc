@@ -3,3 +3,27 @@
 ble-import -d integration/fzf-key-bindings
 ble-sabbrev "~extra"=/mnt/extra
 ble-sabbrev emc="emacsclient -c"
+
+## usage: ble-define-abbrevs
+function ble-define-git-abbrevs {
+    ble-sabbrev gs="git status"
+    ble-sabbrev gl="git log --oneline"
+    ble-sabbrev ga="git add"
+    ble-sabbrev gf="git commit --fixup"
+    ble-sabbrev gsq="git commit --squash"
+    ble-sabbrev gr="git rebase --interactive --autostash --autosquash"
+    ble-sabbrev gc="git checkout"
+    ble-sabbrev gam="git commit --amend"
+    cat <<EOS
+Commands:
+  * ga
+  * gam
+  * gc
+  * gf
+  * gl
+  * gr
+  * gs
+  * gsq
+EOS
+    unset -f ble-define-git-abbrevs
+}
