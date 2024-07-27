@@ -1,0 +1,42 @@
+## usage: __fzf_history
+function __fzf_history {
+    local PERLCMD=$(cat <<"EOF"
+BEGIN {
+    getc;
+    $/ = "\n\t";
+    $HISTCMD = $ENV{LAST_HIST} + 1
+}
+s/^[ *]//;
+print $HISTCMD - $. . "\t$_" if ! $seen{$_}++
+EOF
+	  )
+    # To explain the fzf command line: -n indicates a list of rules on
+    # limiting the scope of search. "2..,.." essentially means "from
+    # the second field to the last and the rest of the fields". "+m"
+    # disables multiselect. "--read0" delimits lines with the null terminator.
+    local output=$(
+	builtin fc -lnr -2147483648 |
+	    LAST_HIST=$(HISTTIMEFORMAT='' builtin history 1) perl -n -l0 -e "$PERLCMD" |
+	    fzf --height 40% -n 2..,.. --tiebreak=index +m --read0 --query "$READLINE_LINE" \
+		--bind ctrl-r:toggle-sort,ctrl-c:clear-query
+	  ) || return
+    READLINE_LINE=${output#*$'\t'}
+    if [[ -z "$READLINE_POINT" ]]; then
+	echo "$READLINE_LINE"
+    else
+	READLINE_POINT=0x7fffffff
+    fi
+    # bind -m emacs-standard '"\C-r": "\C-e \C-u\C-y\ey\C-u"$(__fzf_history)"\e\C-e\er"'
+}
+
+# Redraw the prompt when ESC r (Alt-r) is pressed
+bind -m emacs-standard '"\er": redraw-current-line'
+
+# Bind Control+r to the following:
+# 1. Control+e: move to the end of the current visual line
+# 2. <prefix> Control+y, ESC+y: yank the second-to-last
+#    killed text
+# 3. <prefix> ESC, Control+e: move to the end of the defun
+bind -m emacs-standard '"\C-r": "\C-e \C-u\C-y\ey\C-u"$(__fzf_history)"\e\C-e\er"'
+
+echo "History search with fzf bound to Control r"
