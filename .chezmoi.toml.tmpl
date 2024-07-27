@@ -3,6 +3,7 @@
 {{- $gitUser := promptStringOnce . "gitUser" "Git User" -}}
 {{- $wandbUser := promptStringOnce . "wandbUser" "Wandb User" -}}
 {{- $twitterUser := promptStringOnce . "twitterUser" "Twitter User" -}}
+{{- $youtubeUser := promptStringOnce . "youtubeUser" "Youtube User" -}}
 
 [data]
 zoxideCmd = {{ $zoxideCmd | quote }}
@@ -10,3 +11,4 @@ gitEmail = {{ $gitEmail | quote }}
 gitUser = {{ $gitUser | quote }}
 wandbUser = {{ $wandbUser | quote }}
 twitterUser = {{ $twitterUser | quote }}
+youtubeUser = {{ $youtubeUser | quote }}
