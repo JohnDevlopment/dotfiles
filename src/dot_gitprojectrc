@@ -1,0 +1,271 @@
+# -*- mode: sh; -*-
+
+cat=$(which cat)
+
+## usage: _reword COMMIT
+_reword() {
+    git commit --fixup reword:${1:?missing COMMIT}
+}
+
+alias _fixup='git commit --fixup'
+alias _squash='git commit --squash'
+alias _gs='git status'
+alias _gc='git checkout'
+alias _gdiff='git difftool --dir-diff'
+alias _gl='git log --oneline'
+alias _gr='git rebase --interactive --autostash --autosquash'
+alias _ga='__git_complex add'
+alias _grm='__git_complex remove'
+alias gitoff=__gitoff
+
+if which commit > /dev/null; then
+    ## usage: __commit-do {add | rm} [-n] [-c CONVENTION] FILE
+    function __commit-do {
+	local convention
+	local dry=
+	local tag="${1:?missing TAG}"
+
+	shift
+
+	while getopts :c:n OPT; do
+	    case $OPT in
+		c|+c)
+		    convention="$OPTARG"
+		    ;;
+		n|+n)
+		    dry=echo
+		    ;;
+		*)
+		    echo "usage: commit-$tag [-c CONVENTION] [-n] [--] FILE"
+		    return 2
+	    esac
+	done
+	shift $(( OPTIND - 1 ))
+	OPTIND=1
+
+	# rm => remove
+	[[ $tag = rm ]] && tag=remove
+
+	# Is file added to index?
+	local file="${1:?missing FILE}"
+
+	case $tag in
+	    add)
+		local added=$(__added)
+		if ! grep "$file" <<<"$added" &> /dev/null; then
+		    echo "${file@Q} not added to index"
+		    return 1
+		fi
+		;;
+	    rm|remove)
+		;;
+	    *)
+		echo "invalid tag ${tag@Q}" >&2
+		return 1
+	esac
+
+	$dry commit -t $tag -m "$file"
+    }
+
+    alias commit-add="__commit-do add"
+    alias commit-rm="__commit-do rm"
+fi
+
+function __gitoff {
+    unalias _fixup _squash _gs _gc _gdiff _gl _gr _ga gitoff
+    unset -f __ga __gitoff __gc_complete
+    complete -r _gc 2> /dev/null
+}
+
+## usage: __error FUNCTION FMT ...
+function __error {
+    local func="${1:?missing FUNCTION}"
+    local fmt="${2:?missing FMT}"
+    shift 2
+    printf "$func: $fmt\n" "$@" >&2
+}
+
+function __added {
+    git status --porcelain | grep '^A ' | sed -E 's/^A. (.+)/\1/'
+}
+
+function __untracked {
+    git status --porcelain | grep '^??' | sed -E 's/^\?\?\s(.+)/\1/'
+}
+
+function __modified {
+    git status --porcelain | grep --invert-match '^??' | sed -E -e 's/^ [A-Z] (.+)/\1/' -e '/^[A-Z] .*/ d'
+}
+
+function __git_complex_completion {
+    local idx=$COMP_CWORD
+    local word=${COMP_WORDS[$idx]}
+
+    if [  $idx -eq 1 ]; then
+	local cmds=(add remove)
+	COMPREPLY=($(compgen -W "${cmds[*]}" -- "$word"))
+	return
+    fi
+
+    # Branch according to first argument
+    case "${COMP_WORDS[1]}" in
+	add)
+	    COMPREPLY=($(compgen -W "${OPTIONS[*]}" -- "$word"))
+	    local OPTIONS=(
+		-u --update
+		"${untracked[@]}"
+		"${modified[@]}"
+	    )
+	    ;;
+	remove)
+	    local OPTIONS=(
+		-c --cached
+		${untracked[@]}
+		${modified[@]}
+	    )
+	    ;;
+	*)
+	    return 1
+    esac
+
+    local untracked
+    local modified
+    mapfile -t untracked < <(__untracked)
+    mapfile -t modified < <(__modified)
+
+    if [[ ${COMP_WORDS[1]} == add ]]; then
+	# Add
+	local OPTIONS=(
+	    "${untracked[@]}"
+	    "${modified[@]}"
+	)
+
+	# If -u or --update is not in COMPLINE, add it to OPTIONS
+	if [[ ! $COMP_LINE =~ \ -u\|--update ]]; then
+	    OPTIONS+=(-u --update)
+	fi
+
+	COMPREPLY=($(compgen -W "${OPTIONS[*]}" -- "$word"))
+    else
+	# Remove
+	COMPREPLY=($(compgen -W "${OPTIONS[*]}" -- "$word"))
+    fi
+}
+
+## usage: __git_complex [option] OP [OP option] ...
+##        __git_complex add FILE
+function __git_complex {
+    local fn=__git_complex
+    local cmd="${1:?missing OP}"; shift
+    local file
+    local temp
+    declare -A opts
+
+    temp=$(getopt -o +cuh -l cached,update,help -- "$@")
+    eval set -- "$temp"
+
+    opts=([cached]="" [update]=0 [help]=0)
+
+    while true; do
+	case "$1" in
+	    -c|--cached)
+		opts[cached]="--cached"
+		shift
+		;;
+	    -u|--update)
+		opts[update]=1
+		shift
+		;;
+	    -h|--help)
+		opts[help]=1
+		shift
+		;;
+	    --)
+		shift
+		break
+		;;
+	    *)
+		 __error $fn "Unknown error"
+		 return 2
+	esac
+    done
+
+    case $cmd in
+	add)
+	    # If --help is passed, just print help
+	    if [ ${opts[help]} -ne 0 ]; then
+		echo "Usage: $fn [-uh] [--update] add FILE"
+		echo
+		echo "  Add a FILE to the index."
+		return 1
+	    fi
+
+	    # Message based on whether --update is passed
+	    local msg
+	    file="${1:?missing FILE}"
+	    if [ ${opts[update]} -ne 0 ]; then
+		msg="Update ${file##*/}"
+	    else
+		msg="Add ${file##*/}"
+	    fi
+
+	    cmd=(git add "${file@Q}" '&&' git commit \-m "${msg@Q}")
+	    eval "${cmd[@]}"
+	    ;;
+	remove)
+	    # If --help is passed, just print help
+	    if [ ${opts[help]} -ne 0 ]; then
+		echo "Usage: $fn [-ch] [--cached] remove FILE"
+		echo
+		echo "  Remove a FILE from the index."
+		return 1
+	    fi
+
+	    file="${1:?missing FILE}"
+	    cmd=(git rm ${opts[cached]} "${file@Q}" "&&" git commit -m "'Remove $file'")
+	    eval "${cmd[@]}"
+	    ;;
+	*)
+	    __error $fn "Unknown command '%s'" "$cmd"
+	    return 1
+    esac
+}
+
+function __gc_complete {
+    local cmd=$1
+    shift
+
+    case "$cmd" in
+	_gc)
+	    COMP_WORDS=(git checkout)
+	    COMP_CWORD=2
+	    __git_wrap__git_main
+	    ;;
+	*)
+	    echo "invalid command: $cmd" >&2
+	    false
+    esac
+}
+
+alias git-completions="unalias git-completions; complete -o bashdefault -o default -o nospace -F __gc_complete _gc"
+
+$cat <<EOF
+Gitrc Commands:
+  * _fixup COMMIT
+  * _reword COMMIT
+  * _squash COMMIT
+  * _ga FILE
+  * _gc BRANCH
+  * _gl [GIT-LOG-ARGS...]
+  * _grm FILE
+  * _gs
+  * gitoff
+EOF
+
+if which commit > /dev/null; then
+    $cat <<EOF
+Commit Commands:
+  * commit-add (only if commit is in PATH)
+  * commit-rm (only if commit is in PATH)
+EOF
+fi
