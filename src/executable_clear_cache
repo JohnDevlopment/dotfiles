@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cmd="echo 1 > /proc/sys/vm/drop_caches"
+
+echo "This will commit the following action: \$ $cmd"
+read -p 'Are you sure? (yes/no) ' answer
+if [ "$answer" = 'yes' ]; then
+    exec sudo sh -c "$cmd"
+fi
+
+echo abort
