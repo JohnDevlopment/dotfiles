@@ -1,0 +1,33 @@
+# -*- mode: sh; -*-
+
+## usage: __fzf_pylint
+function __fzf_pylint {
+    local output=$(
+	(python ~/src/.python-module-tree.py ${PKGDIR} ${PKG} || return 1) | \
+	    fzf --height 40% --query "$READLINE_LINE" \
+		--bind ctrl-r:toggle-sort,ctrl-c:clear-query
+    )
+    if [ -n "$output" ]; then
+	READLINE_LINE="pylint $output"
+    fi
+    if [[ -z "$READLINE_POINT" ]]; then
+	echo "$READLINE_LINE"
+    else
+	READLINE_POINT=0x7fffffff
+    fi
+}
+
+# Redraw the prompt when ESC r (Alt-r) is pressed
+bind -m emacs-standard '"\er": redraw-current-line'
+
+PKGDIR="$1"
+PKG="$2"
+
+# Bind Control+r to the following:
+# 1. Control+e: move to the end of the current visual line
+# 2. <prefix> Control+y, ESC+y: yank the second-to-last
+#    killed text
+# 3. <prefix> ESC, Control+e: move to the end of the defun
+bind -m emacs-standard '"\C-l": "\C-e \C-u\C-y\ey\C-u"$(__fzf_pylint)"\e\C-e\er"'
+
+echo "Pylint completion with fzf bound to Control l"
