@@ -422,7 +422,24 @@ function apply {
     done
 }
 
-# Copy file with a progress bar
+## usage: mc-cd [MC ARGS...]
+function mc-cd {
+    MC_USER=$(whoami)
+    MC_PWD_FILE=${TMPDIR:-/tmp}/mc-$MC_USER/mc.pwd.$$
+
+    mc -P "$MC_PWD_FILE" "$@"
+
+    if [ -r "$MC_PWD_FILE" ]; then
+	MC_PWD=$(cat "$MC_PWD_FILE")
+	if [ -n "$MC_PWD" ] && [ "$MC_PWD" != "$PWD" ] && [ -d "$MC_PWD" ]; then
+	    cd "$MC_PWD"
+	fi
+    fi
+
+    delete -f $MC_PWD_FILE
+}
+
+# COPY file with a progress bar
 ## usage: cpp [-m] FILE1 FILE2
 function cpp {
     local move=0
