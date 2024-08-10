@@ -260,6 +260,8 @@ _poetry_d401cf64e39454ff_complete()
     fi
 }
 
+eval "$(register-python-argcomplete pipx)"
+
 # Poetry
 complete -o default -F _poetry_d401cf64e39454ff_complete poetry
 complete -o default -F _poetry_d401cf64e39454ff_complete /home/john/.local/bin/poetry
