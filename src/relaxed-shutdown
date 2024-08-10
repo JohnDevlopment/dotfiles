@@ -1,0 +1,5 @@
+# -*- mode: sh; -*-
+
+sudo shutdown 31
+execnohup vlc ~/Videos/frequencies/Say_No_To_Sugar.ogg
+countdown.sh -m 30
