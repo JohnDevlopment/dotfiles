@@ -30,4 +30,4 @@ PKG="$2"
 # 3. <prefix> ESC, Control+e: move to the end of the defun
 bind -m emacs-standard '"\C-l": "\C-e \C-u\C-y\ey\C-u"$(__fzf_pylint)"\e\C-e\er"'
 
-echo "Pylint completion with fzf bound to Control l"
+echo "Pylint completion with fzf bound to Control l for package $2"
