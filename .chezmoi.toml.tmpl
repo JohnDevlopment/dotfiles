@@ -4,6 +4,7 @@
 {{- $wandbUser := promptStringOnce . "wandbUser" "Wandb User" -}}
 {{- $twitterUser := promptStringOnce . "twitterUser" "Twitter User" -}}
 {{- $youtubeUser := promptStringOnce . "youtubeUser" "Youtube User" -}}
+{{- $mergeTool := promptStringOnce . "mergeTool" "Merge Tool" -}}
 
 [data]
 zoxideCmd = {{ $zoxideCmd | quote }}
@@ -12,3 +13,6 @@ gitUser = {{ $gitUser | quote }}
 wandbUser = {{ $wandbUser | quote }}
 twitterUser = {{ $twitterUser | quote }}
 youtubeUser = {{ $youtubeUser | quote }}
+
+[merge]
+command = {{ $mergeTool | quote }}
