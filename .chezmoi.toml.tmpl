@@ -1,10 +1,10 @@
-{{ $zoxideCmd := promptStringOnce . "zoxideCmd" "Zoxide Command" "cd" -}}
-{{ $gitEmail := promptStringOnce . "gitEmail" "Git User Email" -}}
+{{- $zoxideCmd := promptStringOnce . "zoxideCmd" "Zoxide Command" "cd" -}}
+{{- $gitEmail := promptStringOnce . "gitEmail" "Git User Email" -}}
 {{- $gitUser := promptStringOnce . "gitUser" "Git User" -}}
 {{- $wandbUser := promptStringOnce . "wandbUser" "Wandb User" -}}
 {{- $twitterUser := promptStringOnce . "twitterUser" "Twitter User" -}}
 {{- $youtubeUser := promptStringOnce . "youtubeUser" "Youtube User" -}}
-{{- $mergeTool := promptStringOnce . "mergeTool" "Merge Tool" -}}
+{{- $mergeCmd := promptStringOnce . "mergeCmd" "Merge Command" -}}
 
 [data]
 zoxideCmd = {{ $zoxideCmd | quote }}
@@ -13,6 +13,7 @@ gitUser = {{ $gitUser | quote }}
 wandbUser = {{ $wandbUser | quote }}
 twitterUser = {{ $twitterUser | quote }}
 youtubeUser = {{ $youtubeUser | quote }}
+mergeCmd = {{ $mergeCmd | quote }}
 
 [merge]
-command = {{ $mergeTool | quote }}
+command = {{ $mergeCmd | quote }}
