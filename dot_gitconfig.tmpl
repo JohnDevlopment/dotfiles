@@ -23,11 +23,3 @@
 	cmd = git stash
 [guitool "Stash/Pop"]
 	cmd = git stash pop
-[guitool "Commit/Remove"]
-	cmd = mate-terminal -t \"Commit: Remove File\" -x ~/src/commit-add $FILENAME
-	needsfile = yes
-	noconsole = yes
-[guitool "Commit/Add File"]
-	cmd = mate-terminal -t \"Commit: Add File\" -x ~/src/commit-rm $FILENAME
-	noconsole = yes
-	needsfile = yes
