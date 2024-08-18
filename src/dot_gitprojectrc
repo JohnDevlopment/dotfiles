@@ -3,6 +3,8 @@
 cat=$(which cat)
 ROOT=$(pwd)
 
+alias porcelain="git status --porcelain"
+
 ### COMMANDS
 
 ## usage: _reword COMMIT
@@ -31,7 +33,7 @@ if which commit > /dev/null; then
 
 	# Let the user edit the file directly
 	# and then remove it afterward
-	emacsclient -c $commitfile && {
+	emacsclient -c $commitfile &> /dev/null && {
 	    cat $commitfile | head -n 1
 	}
 	delete -f $commitfile
@@ -184,8 +186,6 @@ function __error {
     shift
     echo -e "${fn:+$fn: }$msg" "$@"
 }
-
-alias porcelain="git status --porcelain"
 
 $cat <<EOF
 Gitrc Commands:
