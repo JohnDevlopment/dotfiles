@@ -1,5 +1,7 @@
 # -*- mode: sh; -*-
 
+bleopt history_share=1
+source ~/src/atuin
 ble-import -d integration/fzf-key-bindings
 ble-sabbrev "~extra"=/mnt/extra
 ble-sabbrev emc="emacsclient -c"
