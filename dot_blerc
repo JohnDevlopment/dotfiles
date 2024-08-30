@@ -5,6 +5,8 @@ source ~/src/atuin
 ble-import -d integration/fzf-key-bindings
 ble-sabbrev "~extra"=/mnt/extra
 ble-sabbrev emc="emacsclient -c"
+ble-sabbrev dv720p="download-video.sh --height 720"
+ble-sabbrev dv480p="download-video.sh --height 480"
 
 ## usage: ble-define-abbrevs
 function ble-define-git-abbrevs {
