@@ -384,6 +384,7 @@ function screen-units {
 ##        mpp -t DIRECTORY FILE ...
 function mpp {
     local cmd
+    local rm=$(which rm)
 
     cmd=(cp -- "$1" "$2")
 
@@ -408,7 +409,7 @@ EOF
     strace -q -ewrite "${cmd[@]}" 2>&1 |
 	awk "$awkcmd" total_size=$(stat -c '%s' "$1") count=0
 
-    /usr/bin/rm -v "$1"
+    $rm -v "$1"
 }
 
 ## usage: apply COMMAND ARG ...
