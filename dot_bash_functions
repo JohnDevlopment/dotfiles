@@ -115,11 +115,6 @@ function set-title {
     PS1=${ORIG}${TITLE}
 }
 
-function backup_git {
-    local repo=${1:?missing repo}
-    jcompress -r -v "$@" $repo.tar.gz $repo
-}
-
 function randstr {
     local len=${1:?no length}
     expr $len + 1 &>/dev/null || {
