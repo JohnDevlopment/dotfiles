@@ -1,0 +1,132 @@
+#!/bin/bash
+
+declare -r BASENAME=$(basename $(realpath "$0"))
+
+### FUNCTIONS
+
+## usage: make_options_table
+function make_options_table {
+    local spec
+    spec=$(cat <<EOF
+    -i,:--interactive:interactively delete files
+    -r,:--readlink:resolve links
+    -h,:--help:print this help and exit
+    -v,:--version:output version information and exit
+EOF
+	)
+    column -t -s : <<<"$spec"
+}
+
+USAGE=$(cat <<EOF
+usage: $BASENAME [-r | -i] FILE...
+       $BASENAME -h
+
+options:
+$(make_options_table)
+EOF
+     )
+
+## usage: usage full
+function usage {
+    local word=$1
+    if [[ $word = full ]]; then
+	echo "$USAGE"
+    else
+	echo "$USAGE" | head -n 2
+    fi
+}
+
+### PARSE OPTIONS
+
+interactive=0
+readlink=0
+
+temp=$(getopt -o ihr -l interactive,help,readlink -- "$@")
+eval set -- "$temp"
+
+while true; do
+    case "$1" in
+	-i|--interactive)
+	    interactive=1
+	    shift
+	    ;;
+	-h|--help)
+	    usage full
+	    exit
+	    ;;
+	-r|--readlink)
+	    readlink=1
+	    shift
+	    ;;
+	--)
+	    shift
+	    break
+	    ;;
+	*)
+
+    esac
+done
+
+if [ $# -eq 0 ]; then
+    usage >&2
+    exit 1
+fi
+
+while getopts :ir OPT; do
+    case $OPT in
+	i)
+	    interactive=1
+	    ;;
+	r)
+	    readlink=1
+	    ;;
+	*)
+	    echo "usage: ${0##*/} [-i | -ir] [--] FILE ..."
+	    return 2
+    esac
+done
+shift $(( OPTIND - 1 ))
+OPTIND=1
+
+if (( interactive != 0 && readlink != 0 )); then
+    die "-r and -i cannot be used together"
+    usage >&2
+    exit 1
+fi
+
+### CODE
+
+## usage: remove_file FILE
+function remove_file {
+    local file="${1:?missing FILE}"
+    local confirmation
+
+    echo "Removing '$file'"
+    read -p "Confirm? {y/n} [n] " confirmation
+    if [ "$confirmation" = "y" ]; then
+	if [ -L "$file" ]; then
+	    read -p "${file@Q} is a symbolic link, remove its target? [y/n] " confirmation
+	    test "$confirmation" = "y" && trash -v $(readlink "$file")
+	fi
+        trash -v "$file"
+    fi
+    echo
+}
+
+if [ $interactive -ne 0 ]; then
+    # Interactively remove files; optionally remove through links
+    for file; do
+	remove_file "$file"
+    done
+else
+    files=("$@")
+    if [ $readlink -ne 0 ]; then
+	for file; do
+	    if [ -L "$file" ]; then
+		files+=($(readlink "$file"))
+	    fi
+	done
+    fi
+
+    trash -v "${files[@]}"
+fi

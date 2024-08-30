@@ -70,38 +70,6 @@
 #     unset -f dprint
 # }
 
-## usage: rm [-i] [FILE ...]
-function rm {
-    local interactive=0
-
-    while getopts :i OPT; do
-	case $OPT in
-	    i)
-		interactive=1
-		;;
-	    *)
-		echo "usage: ${0##*/} [-i] [--] FILE ..."
-		return 2
-	esac
-    done
-    shift $(( OPTIND - 1 ))
-    OPTIND=1
-
-    if (( interactive != 0 )); then
-	local file confirmation
-	for file; do
-	    echo "Removing '$file'..."
-	    read -p "Confirm? {y/n} [n] " confirmation
-	    if [ "$confirmation" = "y" ]; then
-		trash -v "$file"
-	    fi
-	    echo
-	done
-    else
-	trash -v "$@"
-    fi
-}
-
 function _midentify {
     local infile="${1?no input file provided}"
     mplayer -identify -frames 0 -vo null -ao null "$infile" 2>&1 | sed -n 's/^ID_//p'
@@ -378,6 +346,11 @@ function screen-units {
 	    echo "screen-units ERROR: can only convert from cm to pixels" >&2
 	    return 1
     esac
+}
+
+## usage: rm ...
+function rm {
+    ~/bin/.nonpath/rm "$@"
 }
 
 ## usage: mpp FILE2 FILE2
