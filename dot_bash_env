@@ -23,6 +23,9 @@ export DEBEMAIL DEBFULLNAME
 export HOMEBREW_AUTO_UPDATE_SECS
 HOMEBREW_AUTO_UPDATE_SECS=120
 
+export PKG_CONFIG_PATH
+PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
+
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 # For my 'find' shell function
