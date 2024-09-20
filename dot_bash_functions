@@ -1,75 +1,5 @@
 # -*- mode: sh; -*-
 
-## usage: find [STARTING-POINT ...] [FIND-OPTIONS]
-# function find {
-#     local find=$(which find)
-#     local paths=()
-#     local arg
-#     local preopts=()
-#     local optwitharg
-#     local expressions=()
-#     local regextype=()
-
-#     ## usage: dprint MSG [MSG ...]
-#     function dprint {
-# 	local msg="${1:?missing MSG}"
-# 	shift
-# 	if [ ${DEBUG:-0} -ne 0 ]; then
-# 	    echo "DEBUG: $msg" "$@"
-# 	fi
-#     }
-
-#     # Process args
-#     for arg; do
-# 	if [ -n "$optwitharg" ]; then
-# 	    # Is the argument to an option
-# 	    shift
-# 	    preopts+=("$optwitharg" "$arg")
-# 	    echo "Preoption:" "$optwitharg" "$arg"
-# 	    optwitharg=
-# 	    continue
-# 	fi
-
-# 	case "$arg" in
-# 	    -O[123])
-# 		# Optimization level
-# 		shift
-# 		preopts+=("$arg")
-# 		;;
-# 	    -O*)
-# 		shift
-# 		;;
-# 	    -H|-L|-P)
-# 		# Flags that precede any paths
-# 		shift
-# 		preopts+=("$arg")
-# 		;;
-# 	    -D)
-# 		# Debug option
-# 		shift
-# 		optwitharg="$arg"
-# 		;;
-# 	    -*)
-# 		expressions+=("$arg")
-# 		;;
-# 	    *)
-# 		# Nothing
-# 	esac
-#     done
-#     unset arg optwitharg
-
-#     if [ -n "$FIND_REGEX_TYPE" ]; then
-# 	regextype=(-regextype "$FIND_REGEX_TYPE")
-#     fi
-
-#     local opts=("$@")
-    
-#     # $find "${preopts[@]}" "${paths[@]}" "${regextype[@]}" "${opts[@]}" ||
-#     # echo $find "${preopts[@]@Q}" "${paths[@]@Q}" "${regextype[@]}" "${opts[@]@Q}"
-
-#     unset -f dprint
-# }
-
 function _midentify {
     local infile="${1?no input file provided}"
     mplayer -identify -frames 0 -vo null -ao null "$infile" 2>&1 | sed -n 's/^ID_//p'
@@ -442,5 +372,3 @@ EOS
 	delete -v "$1"
     fi
 }
-
-# . /usr/bin/env_parallel.bash
