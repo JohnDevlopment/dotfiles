@@ -1,5 +1,10 @@
 # -*- mode: sh; -*-
 
+## usage: list-python-packages
+function list-python-packages {
+    python ~/src/.python-module-tree.py ${PKGDIR} ${PKG}
+}
+
 ## usage: __fzf_pylint
 function __fzf_pylint {
     local output=$(
