@@ -271,8 +271,11 @@ complete -o default -F _poetry_d401cf64e39454ff_complete /home/john/.local/bin/p
 
 # Default user completions
 complete -o default -o bashdefault emacs
-complete -o bashdefault -o default -F _default_user_completions execnohup ffmpeg vlc
+complete -o bashdefault -o default -F _default_user_completions ffmpeg vlc
+# complete -F _default_user_completions execnohup
 complete -F _default_user_completions emacs-desktop
+
+eval "$(_create_default_user_completions_function execnohup -o bashdefault -o default)"
 
 eval "$(_create_default_user_completions_function gh -o bashdefault -o default)"
 
