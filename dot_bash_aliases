@@ -12,5 +12,17 @@ alias ll-sizes="ll -h | awk '{ print \$5, \$9; }' | tail -n +4 | sort -h | colum
 alias midentify=_midentify
 alias opamload="unalias opamload; eval \$(opam env)"
 alias sshload="$(ssh-agent.sh) unalias sshload"
+if [ ! -f /tmp/ssh-init ]; then
+    ## usage: __ssh_init
+    function __ssh_init {
+	if ssh-add; then
+	    unalias sshinit 2> /dev/null
+	    unalias sshinit 2> /dev/null
+	    unset -f __ssh_init
+	    touch /tmp/ssh-init
+	fi
+    }
+    alias sshinit="$(ssh-agent.sh) __ssh_init"
+fi
 alias tenacity="flatpak run org.tenacityaudio.Tenacity"
 alias venv="__venv | xclip -sel c"
