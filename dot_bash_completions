@@ -242,16 +242,11 @@ eval "$(_create_default_user_completions_function execnohup -o bashdefault -o de
 complete -o default -F _poetry_d401cf64e39454ff_complete poetry
 complete -o default -F _poetry_d401cf64e39454ff_complete /home/john/.local/bin/poetry
 
-# Quilt
-#complete -F _quilt_completion $_quilt_complete_opt dquilt
-
 # Default user completions
 complete -o default -o bashdefault emacs
 complete -o bashdefault -o default -F _default_user_completions ffmpeg vlc
 # complete -F _default_user_completions execnohup
 complete -F _default_user_completions emacs-desktop
-
-eval "$(_create_default_user_completions_function gh -o bashdefault -o default)"
 
 if [[ "${BASH_VERSINFO[0]}" -eq 4 && "${BASH_VERSINFO[1]}" -ge 4 || "${BASH_VERSINFO[0]}" -gt 4 ]]; then
     complete -F _default_user_completions -o nosort -o bashdefault -o default atuin
