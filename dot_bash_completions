@@ -260,7 +260,17 @@ _poetry_d401cf64e39454ff_complete()
     fi
 }
 
+{{ if lookPath "register-python-argcomplete" -}}
+{{ if lookPath "pipx" -}}
 eval "$(register-python-argcomplete pipx)"
+{{- end }}
+{{ if lookPath "pip" -}}
+eval "$(register-python-argcomplete pip)"
+{{- end }}
+{{ if lookPath "execnohup" }}
+eval "$(_create_default_user_completions_function execnohup -o bashdefault -o default)"
+{{- end }}
+{{- end }}
 
 # Poetry
 complete -o default -F _poetry_d401cf64e39454ff_complete poetry
@@ -275,8 +285,6 @@ complete -o bashdefault -o default -F _default_user_completions ffmpeg vlc
 # complete -F _default_user_completions execnohup
 complete -F _default_user_completions emacs-desktop
 
-eval "$(_create_default_user_completions_function execnohup -o bashdefault -o default)"
-
 eval "$(_create_default_user_completions_function gh -o bashdefault -o default)"
 
 if [[ "${BASH_VERSINFO[0]}" -eq 4 && "${BASH_VERSINFO[1]}" -ge 4 || "${BASH_VERSINFO[0]}" -gt 4 ]]; then
@@ -285,13 +293,30 @@ else
     complete -F _default_user_completions -o bashdefault -o default atuin
 fi
 
-_jbackup_completion() {
+{{ if lookPath "jbackup" -}}
+function _jbackup_completion {
     local IFS=$'
 '
     COMPREPLY=( $( env COMP_WORDS="${COMP_WORDS[*]}" \
-                   COMP_CWORD=$COMP_CWORD \
-                   _JBACKUP_COMPLETE=complete_bash $1 ) )
+		       COMP_CWORD=$COMP_CWORD \
+		       _JBACKUP_COMPLETE=complete_bash $1 ) )
     return 0
 }
 
 complete -o default -F _jbackup_completion jbackup
+{{- end }}
+
+{{ if lookPath "godot" -}}
+function _godot_completion {
+    local IFS=$'
+'
+    COMPREPLY=( $( env COMP_WORDS="${COMP_WORDS[*]}" \
+		       COMP_CWORD=$COMP_CWORD \
+		       _GODOT_COMPLETE=complete_bash $1 ) )
+    return 0
+}
+
+complete -o default -F _godot_completion godot
+{{- end }}
+
+eval "$(chezmoi completion bash)"
