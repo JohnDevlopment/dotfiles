@@ -1,40 +1,7 @@
 # -*- mode: sh; -*-
 
-# usage: _array_range <array> <start> [<end>]
-# _array_range() {
-#     while getopts :Q OPT; do
-# 	case $OPT in
-# 	    Q|+Q)
-# 		local quote=1
-# 		;;
-# 	    *)
-# 		echo "usage: ${0##*/} [+-Q} [--] ARGS..."
-# 		exit 2
-# 	esac
-#     done
-#     shift $(( OPTIND - 1 ))
-#     OPTIND=1
-
-#     declare -n Array=${1:?provide an array name}
-#     local start=${2:?provide the starting index}
-#     local end=${3:--1}
-#     if [ $end -lt 0 ]; then
-# 	end=$(( ${#Array[@]} - 1 ))
-#     fi
-
-#     local result=()
-#     for i in $(seq $start $end); do
-# 	result+=("${Array[$i]}")
-#     done
-#     if [ ${quote:-0} -ne 0 ]; then
-# 	echo "${result[@]@Q}"
-#     else
-# 	echo "${result[@]}"
-#     fi
-# }
-
 ## usage: _create_default_user_completions_function NAME [OPTION] ...
-_create_default_user_completions_function() {
+function _create_default_user_completions_function {
     local name=${1:?missing NAME}
     shift
     cat <<EOF
@@ -45,7 +12,7 @@ complete $@ -F _${name}_completion $name
 EOF
 }
 
-_default_user_completions() {
+function _default_user_completions {
     local cmd=$1
     if [[ -z $cmd ]]; then
 	cmd=${COMP_WORDS[0]}
@@ -62,8 +29,7 @@ _default_user_completions() {
     fi
 }
 
-_poetry_d401cf64e39454ff_complete()
-{
+function _poetry_d401cf64e39454ff_complete {
     local cur script coms opts com
     COMPREPLY=()
     _get_comp_words_by_ref -n : cur words
