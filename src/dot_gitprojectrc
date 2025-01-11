@@ -11,7 +11,12 @@ function _reword {
     git commit --fixup reword:${1:?missing COMMIT}
 }
 
-alias _squash='git commit --squash'
+## usage: _squash COMMIT
+function _squash {
+    local commit="${1:?missing COMMIT}"
+    git commit --squash $commit
+    history -s git commit --squash $commit
+}
 
 alias _fixup='git commit --fixup; history -s git commit --fixup'
 alias _gdiff='git difftool --dir-diff; history -s git difftool --dir-diff'
