@@ -4,6 +4,25 @@ ROOT=$(pwd)
 
 alias porcelain="git status --porcelain"
 
+### COMMANDLINE ARGUMENTS
+
+temp=$(getopt -o :p -l python -- "$@")
+eval set -- "$temp"
+
+while true; do
+    case "$1" in
+	-p|--python)
+	    MODE=python
+	    shift
+	    ;;
+	--)
+	    shift
+	    break
+	    ;;
+	*)
+    esac
+done
+
 ### COMMANDS
 
 ## usage: _reword COMMIT
@@ -179,6 +198,37 @@ if which commit > /dev/null; then
 
 	${dry:-eval} commit ${convention:+-c $convention} -t $tag -m "${msg@Q}"
     }
+
+    if [ "$MODE" = "python" ]; then
+	## usage: commit-dep [-d] DEPENDENCY
+	function commit-dep {
+	    local answer D N
+	    while getopts :dn OPT; do
+		case $OPT in
+		    d)
+			D=" (dev)"
+			;;
+		    n)
+			N=echo
+			;;
+		    *)
+			echo "commit-dep [-d] DEPENDENCY"
+			return 1
+		esac
+	    done
+	    shift $(( OPTIND - 1 ))
+	    OPTIND=1
+
+	    local dependency=${1:?missing DEPENDENCY}
+
+	    read -p 'Add pyproject.toml and poetry.lock? [y/n] ' answer
+	    if [ "$answer" = "y" ]; then
+		git add pyproject.toml poetry.lock
+	    fi
+
+	    $N commit -t project -m "Add ${dependency}$D" -ct -
+	}
+    fi
 
     alias commit-add="__commit-do add"
     alias commit-refactor="__commit-do refactor"
