@@ -27,8 +27,8 @@
 	cmd = git fixup-gui
 	needsfile = yes
 [guitool "Commit/Add File"]
-	cmd = git commit -m \"Add $FILENAME\"
+	cmd = git-gui-commit add "$FILENAME"
 	needsfile = yes
 [guitool "Commit/Update File"]
-	cmd = git commit -m \"Update $FILENAME\"
+	cmd = git-gui-commit update "$FILENAME"
 	needsfile = yes
