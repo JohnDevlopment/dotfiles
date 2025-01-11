@@ -175,9 +175,11 @@ function __dprint {
 }
 
 function __gitoff {
-    unalias _fixup _squash _gs _gc _gdiff _gl _gr _ga gitoff
-    unset -f __ga __gitoff __gc_complete
-    complete -r _gc 2> /dev/null
+    unalias _fixup _ga _gb _gdiff _gl _gr _gs commit-{add,refactor,rm,update} \
+	    gitoff porcelain 2> /dev/null
+    unset -f __commit-do __dprint __error __ga __gitoff __temporary_input_file _reword _squash _squash \
+	  format-commit list-commands
+    unset MODE ROOT
 }
 
 ## usage: __error [-f FUNCTION] ...
@@ -207,15 +209,15 @@ Gitrc Commands:
   * _gs
   * gitoff
 EOF
-
-if which commit > /dev/null; then
-    $cat <<EOF
+    if which commit > /dev/null; then
+	cat <<EOF
 Commit Commands:
   * commit-add
   * commit-refactor
   * commit-rm
   * commit-update
 EOF
-fi
+    fi
+}
 
-unset cat
+list-commands
