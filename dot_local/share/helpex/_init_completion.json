@@ -1,0 +1,29 @@
+{
+    "name": "_init_completion",
+    "signature": "_init_completion [-s] [-n EXCLUDE] [-ios REDIR]",
+    "description": [
+	"A helper function for initializing completion environment in Bash scripts. This is used by some Bash completion scripts; in particular, the function for sudo uses this.",
+	{
+	    "type": "options",
+	    "items": [
+		["-n", "exclude characters from completion"],
+		["-e", "set the error redirection"],
+		["-o", "set the output redirection"],
+		["-i", "set the input redirection"],
+		["-s", "disables splitting (also adds '=' to -n)"]
+	    ]
+	},
+	"As a side effect of this function, the variables cur, prev, words, cword, and split are set.",
+	{
+	    "type": "list",
+	    "heading": "Variables:",
+	    "items": [
+		"cur = the current word being completed",
+		"prev = the previous word in the command line",
+		"words = an array containing the arguments passed to the command",
+		"cword = the index of the word being completed"
+	    ]
+	}
+    ],
+    "exit status": "Returns success unless initialization has failed."
+}

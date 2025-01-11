@@ -1,0 +1,26 @@
+{
+    "name": "aliases",
+    "signature": "...",
+    "description": [
+	"This is a list of aliases which are defined under ~/.bash_aliases.",
+	{
+	    "type": "list",
+	    "heading": "Aliases",
+	    "items": [
+		"blesh - configures the current terminal to use ble.sh functionalities",
+		"delete - alias of /usr/bin/rm",
+		"dtail - get the last 50 lines of docker logs",
+		"emc - alias of `emacsclient -c`",
+		"emcview - alias of __emc-view (a shell function)",
+		"list-user-functions - lists user functions currently defined in ~/.bash_functions",
+		"midentify - uses MPlayer to read a file's metadata; alias of _midentify (shell function)",
+		"ll-dirsizes - prints each directory and its size on disk",
+		"ll-sizes - prints each file and its size on disk",
+		"opamload - loads the environment for the current switch of Opam",
+		"sshload - loads environment bindings to communicate with the loaded SSH user agent",
+		"tenacity - Audacity fork (installed under Flatpak)",
+		"venv - calls __venv and redirects its output to the clipboard"
+	    ]
+	}
+    ]
+}

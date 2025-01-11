@@ -1,0 +1,25 @@
+{
+    "name": "cp_prefix",
+    "signature": "cp_prefix [-v] SRC DEST",
+    "description": [
+	"Copy SRC to DEST with pattern substitutions.",
+	"Copies the source file SRC to the destination path DEST with potential substitutions based on the asterik. SRC and DEST can each be relative or absolute. If DEST contains at least one asterik, a pattern substitution will be done with it, otherwise this behaves as a normal cp command with a single SRC and DEST argument.",
+	{
+	    "type": "options",
+	    "items": [
+		["-v", "Passed verbatim to cp."],
+		["-h", "Print a help message and return."]
+	    ]
+	},
+	{
+	    "type": "list",
+	    "heading": "Pattern Substitutions:",
+	    "items": [
+		"If the asterik is at the end of DEST (e.g., \"prefix_*\"), the text preceding it is prepended to original filename in DEST. For example, if SRC was \"file1.txt\", the result would end up being \"prefix_file1.txt\".",
+		"If the asterik is at the beginning of DEST (e.g., \"*_suffix\"), the text following it is appended to the original filename; thus the same example with DEST = \"*_suffix\" would yield \"file1.txt_suffix\".",
+		"Any other case is interpreted literally by this function; therefore, due to Shell pattern substitution, the results would be undefined."
+	    ]
+	}
+    ],
+    "exit status": "Returns the same success code as the cp command, which see."
+}

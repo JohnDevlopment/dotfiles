@@ -1,0 +1,8 @@
+{
+    "name": "lsdirs",
+    "signature": "lsdirs [-hq] [DIR]",
+    "description": [
+	"List all the directories in the current working directory.",
+	"Each directory is printed on its own line. Unless -q or --no-quotes are passed, said directory will be surrounded by quotes."
+    ]
+}

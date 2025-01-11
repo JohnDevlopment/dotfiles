@@ -1,0 +1,17 @@
+{
+    "name": "subshell",
+    "signature": "subshell [-H] [-i FILE]",
+    "description": [
+	"Enter an interactive subshell with its own command history.",
+	"By default, the system's bashrc and the current user's bashrc are loaded. An additional script may be loaded by passing it in the -i option.",
+	"If -i is not passed, then commands can be directly entered into the subshell prior to execution via standard input.",
+	{
+	    "type": "options",
+	    "items": [
+		["-H", "do not read from any history file. Clear the history"],
+		["-i FILE", "load FILE as a Bash script and execute its commands in the current shell"]
+	    ]
+	}
+    ],
+    "exit status": "The return code is always non-zero when exiting the subshell via `exit`."
+}

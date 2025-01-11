@@ -1,0 +1,8 @@
+{
+    "name": "_parse_usage",
+    "signature": "_parse_usage COMMAND [FLAG]",
+    "description": [
+	"Parse usage information from a command. Returns a space separated list of the command's options.",
+	"COMMAND is the command to parse options from. If FLAG is not specified, then it defaults to \"--usage\". The result of FLAG should be to get a usage message."
+    ]
+}

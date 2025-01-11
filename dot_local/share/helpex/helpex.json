@@ -1,0 +1,23 @@
+{
+    "name": "helpex",
+    "signature": "helpex [-e|--edit] [COMMAND]",
+    "description": [
+	"Display information about user-defined commands.",
+	"Displays information about COMMAND, provided that a help file exists for it. If COMMAND is not specified, then a list of commands for which there are documentation are listed.",
+	"If the -e flag is provided, the source file is opened in the application specified in $EDITOR. If $EDITOR is not defined, the path to the file is printed instead.",
+	"For a command to be listed, there must be a help file of the same name, with the .json extension. For example, helpex's documentation is found inside a file called helpex.json. The JSON file uses a dictionary as the root object and has the following keys:",
+	{
+	    "type": "list",
+	    "heading": "Doc Structure",
+	    "items": [
+		"name (string) - the name of the command",
+		"signature (string) - AKA, the usage string. Indicates how to call the command",
+		"description (array) - each element is a paragraph",
+		"exit status (string, optional) - a paragraph describing the potential exit code(s)"
+	    ]
+	},
+	"The documentation can have lists, both generic lists and option lists. To specify a normal list, add a dictionary with the key 'type' set to 'list', and then specify the 'heading' (string) and the 'items' (array of strings denoting items).",
+	"Option lists are comprised of a dictionary with the 'type' set to 'options'. The key 'items' is an array of nested arrays, wherein the first item is the option, and the second item is the description."
+    ],
+    "exit status": "Returns success unless there is no documentation for COMMAND or there is an error parsing the JSON file."
+}

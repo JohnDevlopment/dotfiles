@@ -1,0 +1,8 @@
+{
+    "name": "_parse_help",
+    "signature": "_parse_help COMMAND [FLAG]",
+    "description": [
+	"Parse help information from a command. Returns a space separated list of the command's options.",
+	"COMMAND is the command to parse options from. If FLAG is not specified, then it defaults to \"--help\". The result of FLAG should be to get a help message."
+    ]
+}

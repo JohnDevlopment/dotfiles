@@ -1,0 +1,9 @@
+{
+    "name": "cpp",
+    "signature": "cpp [-m] FILE1 FILE2",
+    "exit status": "Returns true unless the underlying command returns an error.",
+    "description": [
+	"Copy or move FILE1 to FILE2 with a progress bar.",
+	"If the -m switch is provided, FILE1 is deleted after the copy, effectively moving it."
+    ]
+}
