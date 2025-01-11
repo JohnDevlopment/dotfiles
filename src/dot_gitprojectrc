@@ -1,6 +1,5 @@
 # -*- mode: sh; -*-
 
-cat=$(which cat)
 ROOT=$(pwd)
 
 alias porcelain="git status --porcelain"
@@ -8,17 +7,18 @@ alias porcelain="git status --porcelain"
 ### COMMANDS
 
 ## usage: _reword COMMIT
-_reword() {
+function _reword {
     git commit --fixup reword:${1:?missing COMMIT}
 }
 
-alias _fixup='git commit --fixup'
 alias _squash='git commit --squash'
-alias _gs='git status'
-alias _gdiff='git difftool --dir-diff'
-alias _gl='git log --oneline'
-alias _gr='git rebase --interactive --autostash --autosquash'
+
+alias _fixup='git commit --fixup; history -s git commit --fixup'
+alias _gdiff='git difftool --dir-diff; history -s git difftool --dir-diff'
 alias gitoff=__gitoff
+alias _gl='git log --oneline; history -s git log --oneline'
+alias _gr='git rebase --interactive --autostash --autosquash; history -s git rebase --interactive --autostash --autosquash'
+alias _gs='git status; history -s git status'
 
 if which commit > /dev/null; then
     ## usage: __temporary_input_file [INITIAL-INPUT]
@@ -187,13 +187,14 @@ function __error {
     echo -e "${fn:+$fn: }$msg" "$@"
 }
 
-$cat <<EOF
+## usage: list-commands
+function list-commands {
+    cat <<EOF
 Gitrc Commands:
   * _fixup COMMIT
   * _reword COMMIT
   * _squash COMMIT
   * _ga FILE (deprecated)
-  * _gc BRANCH
   * _gl [GIT-LOG-ARGS...]
   * _grm FILE (deprecated)
   * _gs
