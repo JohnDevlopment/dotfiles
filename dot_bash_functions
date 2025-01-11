@@ -338,6 +338,57 @@ function mc-cd {
     delete -f $MC_PWD_FILE
 }
 
+## usage: cp_prefix [-v] SRC DEST
+function cp_prefix {
+    local OPT VERBOSE
+    while getopts :hv OPT; do
+	case $OPT in
+	    h)
+		echo "usage: cp_prefix [-v] SRC DEST"
+		return
+		;;
+	    v)
+		VERBOSE="-v"
+		;;
+	    *)
+		echo "usage: cp_prefix [-v] SRC DEST"
+		return 1
+	esac
+    done
+    shift $(( OPTIND - 1 ))
+    OPTIND=1
+
+    # Parse the arguments
+    local src dest REGEX_ASTERIK_AT_BEGIN REGEX_ASTERIK_AT_END
+    src="${1:?missing SRC}"
+    dest="${2:?missing DEST}"
+    REGEX_ASTERIK_AT_BEGIN="^\\*(.+)"
+    REGEX_ASTERIK_AT_END="(.+)\\*$"
+
+    # Canonicalize paths and separate the directory and filename
+    # from each path
+    local srcdir srcbase destdir destbase
+    src=$(realpath -- "$src")
+    srcdir=$(dirname -- "$src")
+    srcbase=$(basename -- "$src")
+    dest=$(realpath -- "$dest")
+    destdir=$(dirname -- "$dest")
+    destbase=$(basename -- "$dest")
+
+    # If DEST is a pattern
+    if [[ $destbase =~ $REGEX_ASTERIK_AT_BEGIN ]]; then
+	# Append the original filename to the pattern
+	dest="${destdir}/${srcbase}${BASH_REMATCH[1]}"
+    elif [[ $destbase =~ $REGEX_ASTERIK_AT_END ]]; then
+	# Prepend the original filename to the pattern
+	dest="${destdir}/${BASH_REMATCH[1]}${srcbase}"
+	echo "$dest"
+    fi
+
+    # Final command to be executed
+    cp ${VERBOSE} -- "$src" "$dest"
+}
+
 # COPY file with a progress bar
 ## usage: cpp [-m] FILE1 FILE2
 function cpp {
