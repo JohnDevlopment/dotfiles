@@ -115,10 +115,18 @@ if which commit > /dev/null; then
 	    add)
 		# Is file added to index?
 		local added=$(porcelain | grep '^A ' | sed -E 's/^.. (.+)/\1/')
-		if ! grep "$file" <<<"$added" &> /dev/null; then
-		    echo "${file@Q} not added to index"
-		    return 1
+		if [ $addfile -eq 0 ]; then
+		    if ! grep "$file" <<<"$added" &> /dev/null; then
+			echo "${file@Q} not added to index"
+			return 1
+		    fi
+		else
+		    git add "$file" || {
+			__error -f __commit_do "Could not add ${file@Q} to index"
+			return 1
+		    }
 		fi
+
 		msg="$file"
 		;;
 	    remove|rm)
@@ -126,12 +134,19 @@ if which commit > /dev/null; then
 		msg="$file"
 		;;
 	    refactor|update)
-		# good:
-		#   * " M" -- updated in working tree; not added to index
-		#   * "M " -- modified; added to index
-		if ! (porcelain | grep -E "^M " &> /dev/null); then
-		    __error -f commit-$tag "Updated $file not added to index"
-		    return 1
+		if [ $addfile -eq 0 ]; then
+		    # good:
+		    #   * " M" -- updated in working tree; not added to index
+		    #   * "M " -- modified; added to index
+		    if ! (porcelain | grep -E "^MM" &> /dev/null); then
+			__error -f commit-$tag "Updated $file not added to index"
+			return 1
+		    fi
+		else
+		    git add "$file" || {
+			__error -f __commit_do "Could not add ${file@Q} to index"
+			return 1
+		    }
 		fi
 
 		# -C lets the user edit the commit message
@@ -142,7 +157,6 @@ if which commit > /dev/null; then
 		else
 		    msg="$file"
 		fi
-
 		;;
 	    *)
 		__error -f __commit-do "Internal error"
