@@ -19,6 +19,7 @@ function _squash {
 }
 
 alias _fixup='git commit --fixup; history -s git commit --fixup'
+alias _gb="git branch; history -s git branch"
 alias _gdiff='git difftool --dir-diff; history -s git difftool --dir-diff'
 alias gitoff=__gitoff
 alias _gl='git log --oneline; history -s git log --oneline'
@@ -200,6 +201,7 @@ Gitrc Commands:
   * _reword COMMIT
   * _squash COMMIT
   * _ga FILE (deprecated)
+  * _gb
   * _gl [GIT-LOG-ARGS...]
   * _grm FILE (deprecated)
   * _gs
