@@ -228,6 +228,13 @@ if which commit > /dev/null; then
 
 	    $N commit -t project -m "Add ${dependency}$D" -ct -
 	}
+    else
+	# Generic behavior
+	## usage: commit-dep [-d] DEPENDENCY
+	function commit-dep {
+	    local dependency=${1:?missing DEPENDENCY}
+	    $N commit -t project -m "Add $dependency"
+	}
     fi
 
     ## usage: format-commit [-c]
