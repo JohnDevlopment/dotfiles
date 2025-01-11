@@ -127,6 +127,15 @@ if which commit > /dev/null; then
 		    }
 		fi
 
+		# -C lets the user edit the commit message
+		# beforehand, whereas the default behavior
+		# is to just use FILE
+		if [ $editcommit -ne 0 ]; then
+		    msg=$(__temporary_input_file $file)
+		else
+		    msg="$file"
+		fi
+
 		msg="$file"
 		;;
 	    remove|rm)
