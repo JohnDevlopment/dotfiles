@@ -1,0 +1,56 @@
+# -*- mode: sh; -*-
+
+## usage: test-template FILE
+function test-template {
+    local file=${1:?missing FILE} temp catopts=()
+
+    temp=$(getopt -o dhl: -l diff,help,language -- "$@")
+    eval set -- "$temp"
+
+    while true; do
+	case "$1" in
+	    --)
+		shift
+		break
+		;;
+	    *)
+		catopts=
+	esac
+    done
+
+    cat "${catopts[@]}" $file | chezmoi execute-template
+    history -s cat "${catopts[@]}" $file "|" chezmoi execute-template
+}
+
+test "$1" = "functions-only" && {
+    echo "Functions only"
+    return
+}
+
+source ~/src/.gitprojectrc
+source ~/src/.fzf-history
+
+alias reset_prompt='PS1="$OLD_PS1"'
+OLD_PS1="$PS1"
+PS1="(chezmoi) "'\[\e]0;\u:\w\a\]\[\e[1;32m\]\u\[\e[00m\]:\[\e[1;34m\]\w\[\033[00m\]\$ '
+
+alias emacs="execnohup emacs; unalias emacs; history -s execnohup emacs"
+alias git-gui="execnohup --sleep 2 -n 2 git gui; unalias git-gui; history -s execnohup --sleep 2 -n 2 git gui"
+
+cat <<EOS
+Commands:
+  * emacs (once, modifies history)
+  * git-gui (once, modifies history)
+EOS
+
+if [ ${SHELLRC_HISTINIT:=0} -eq 0 ]; then
+    echo "Initializing history..."
+
+    SHELLRC_HISTINIT=1
+    history -c
+    export HISTFILE
+    HISTFILE="$HOME/.local/share/chezmoi/.bash_history"
+    HISTSIZE=500
+    HISTFILESIZE=500
+    history -r
+fi
