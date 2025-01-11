@@ -10,19 +10,23 @@ ble-sabbrev dv480p="download-video.sh --height 480"
 
 ## usage: ble-define-abbrevs
 function ble-define-git-abbrevs {
-    ble-sabbrev gs="git status"
-    ble-sabbrev gl="git log --oneline"
     ble-sabbrev ga="git add"
-    ble-sabbrev gf="git commit --fixup"
-    ble-sabbrev gsq="git commit --squash"
-    ble-sabbrev gr="git rebase --interactive --autostash --autosquash"
-    ble-sabbrev gc="git checkout"
     ble-sabbrev gam="git commit --amend"
+    ble-sabbrev gb="git branch"
+    ble-sabbrev gc="git checkout"
+    ble-sabbrev gd="git diff"
+    ble-sabbrev gf="git commit --fixup"
+    ble-sabbrev gl="git log --oneline"
+    ble-sabbrev gr="git rebase --interactive --autostash --autosquash"
+    ble-sabbrev gs="git status"
+    ble-sabbrev gsq="git commit --squash"
     cat <<EOS
 Commands:
   * ga
   * gam
+  * gb
   * gc
+  * gd
   * gf
   * gl
   * gr
