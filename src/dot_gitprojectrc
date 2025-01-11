@@ -230,6 +230,33 @@ if which commit > /dev/null; then
 	}
     fi
 
+    ## usage: format-commit [-c]
+    function format-commit {
+	local tmp=$(mktemp) C=0
+
+	while getopts :c OPT; do
+	    case $OPT in
+		c)
+		    C=1
+		    ;;
+		*)
+		    echo "usage: format-commit [-c]"
+		    return 1
+	    esac
+	done
+	shift $(( OPTIND - 1 ))
+	OPTIND=1
+
+	commit -n | tee $tmp
+	echo "##########"
+	if [ $C -eq 0 ]; then
+	    sed -Enz 's/.+git commit -m "([^"]*)\n?"/\1/p' $tmp
+	else
+	    sed -Enz 's/.+git commit -m "([^"]*)\n?"/\1/p' $tmp | xclip -selection clipboard
+	fi
+	delete $tmp
+    }
+
     alias commit-add="__commit-do add"
     alias commit-refactor="__commit-do refactor"
     alias commit-rm="__commit-do rm"
