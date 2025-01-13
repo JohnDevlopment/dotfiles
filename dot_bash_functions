@@ -111,7 +111,7 @@ function subshell {
 
     # Parse options
     local OPT OPTARG OPTIND input history=1 dry=0
-    while getopts :Hhin: OPT; do
+    while getopts :Hhi:n OPT; do
 	case $OPT in
 	    H)
 		history=0
@@ -161,6 +161,7 @@ EOF
 history -c
 HISTFILE="$PWD/.bash_history"
 export HISTFILE
+history -r
 EOF
     fi
 
@@ -172,8 +173,7 @@ EOF
 	echo "$input" >> $script
     else
 	# Detect if stdin is either a pipe or the terminal
-	local temp=$(detect_stdin)
-	case "$temp" in
+	case $(detect_stdin) in
 	    Pipe:*)
 		while read -r line; do
 		    echo "$line" >> $script
@@ -183,10 +183,11 @@ EOF
 	esac
     fi
 
-    local debug=${DEBUG:-0}
-    if [ $debug -ne 0 ]; then
-	# Debug mode
-	cat $script
+    if [ $dry -ne 0 ]; then
+	# Print script
+	local temp=$(cat $script)
+	echo bash --rcfile $script
+	echo -e "#####$script\n$temp\n#####"
 	$RM -rfv "$tmpdir"
     else
 	# Execute subshell
