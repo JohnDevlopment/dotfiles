@@ -737,7 +737,7 @@ spawn_once("psensor")
 spawn_once("redshift-gtk -l 37.01:-94.5 -b 0.85:0.75 -m randr -t 6200:4500 -g 0.9", "redshift")
 spawn_once("blueman-applet", "blueman")
 spawn_once("parcellite")
-spawn_once("thunderbird")
+spawn_once("betterbird")
 -- VPN client
 spawn_once("/opt/piavpn/bin/pia-client %u --quiet", "pia-client")
 
