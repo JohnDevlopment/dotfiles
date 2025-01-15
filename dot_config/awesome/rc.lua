@@ -539,11 +539,11 @@ awful.rules.rules = {
        }
     },
 
-    -- Thunderbird
+    -- Betterbird
     -- On the fourth tag, tiled
     {
        rule = {
-	  class = "thunderbird"
+	  class = "eu.betterbird.Betterbird"
        },
        properties = {
 	  tag = "4",
@@ -553,7 +553,7 @@ awful.rules.rules = {
     -- Floating client for "sending message" window
     {
        rule = {
-	  class = "thunderbird",
+	  class = "eu.betterbird.Betterbird",
 	  name = "Sending Message"
        },
        properties = {
