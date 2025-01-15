@@ -67,60 +67,54 @@ if which commit > /dev/null; then
     ## usage: __commit-do TAG [-Can] [-c CONVENTION] FILE
     ## TAG: One of add, refactor, remove, rm, update
     function __commit-do {
-	local convention dry
-	local addfile=0
-	local editcommit=0
-	local USAGE="usage: commit-$tag [-Can] [-c CONVENTION] [--] FILE"
+	local convention dry addfile=0 editcommit=0
+	local tag="$1"; shift
+	local usage="usage: commit-$tag [-Can] [-c CONVENTION] [--] FILE"
 
-	local temp=$(getopt -o aCc:hn -l help -- "$@")
-	eval set -- "$temp"
-
-	while true; do
-	    case "$1" in
-		-a)
+	local opt
+	OPTIND=1
+	while getopts :aCc:nh opt; do
+	    case $opt in
+		a)
 		    addfile=1
-		    shift
 		    ;;
-		-C)
+		C)
 		    editcommit=1
-		    shift
 		    ;;
-		-c)
-		    convention="$2"
-		    shift 2
+		c)
+		    convention="$OPTARG"
 		    ;;
-		-h|--help)
-		    echo "$USAGE"
+		n)
+		    # shellcheck disable=SC2209
+		    dry=echo
+		    ;;
+		h)
+		    echo "$usage"
 		    return
 		    ;;
-		-n)
-		    dry=echo
-		    shift
-		    ;;
-		--)
-		    shift
-		    break
+		:)
+		    __error -f commit-$tag "Missing argument for '-$OPTARG'"
+		    return 1
 		    ;;
 		*)
-		    __error "Internal error"
-		    return 2
+		    __error -f commit-$tag "Invalid option: '-$OPTARG'"
+		    return 1
 	    esac
 	done
 
 	# Positional arguments
-	local tag="$1"
 	local file="$2"
 
 	# Missing or incorrect args
 	if [ -z "$tag" ]; then
-	    __error -f __commit-do "Missing tag\n$USAGE"
+	    __error -f __commit-do "Missing tag\n$usage"
 	    return 1
 	elif [ -z "$file" ]; then
-	    __error -f __commit-do "Missing file\n$USAGE"
+	    __error -f commit-$tag "Missing file\n$usage"
 	    return 1
 	elif [[ ! $tag =~ add|r(e(factor|move)|m)|update ]]; then
 	    # Uses a regular expression to see if TAG is valid
-	    __error -f __commit_do "Invalid tag '$tag', must be one of add, refactor, remove, rm, or update"
+	    __error -f __commit-do "Internal error; Invalid tag '$tag', must be one of add, refactor, remove, rm, or update"
 	    return 1
 	fi
 
@@ -133,7 +127,9 @@ if which commit > /dev/null; then
 	case $tag in
 	    add)
 		# Is file added to index?
-		local added=$(porcelain | grep '^A ' | sed -E 's/^.. (.+)/\1/')
+		local added
+		added=$(porcelain | grep '^A ' | sed -E 's/^.. (.+)/\1/')
+
 		if [ $addfile -eq 0 ]; then
 		    if ! grep "$file" <<<"$added" &> /dev/null; then
 			echo "${file@Q} not added to index"
@@ -141,7 +137,7 @@ if which commit > /dev/null; then
 		    fi
 		else
 		    git add "$file" || {
-			__error -f __commit_do "Could not add ${file@Q} to index"
+			__error -f commit-add "Could not add ${file@Q} to index"
 			return 1
 		    }
 		fi
@@ -172,7 +168,7 @@ if which commit > /dev/null; then
 		    fi
 		else
 		    git add "$file" || {
-			__error -f __commit_do "Could not add ${file@Q} to index"
+			__error -f commit-$tag "Could not add ${file@Q} to index"
 			return 1
 		    }
 		fi
