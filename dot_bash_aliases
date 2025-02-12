@@ -1,10 +1,9 @@
-#!/bin/bash
-
 alias blesh="unalias blesh; source ~/.local/share/blesh/ble.sh; source ~/.blerc"
 alias cat=bat
 alias delete=$(which rm)
 alias dquilt="quilt --quiltrc=${HOME}/.quiltrc-dpkg"
 alias dtail='sudo docker logs -tf --tail="50" "$@"'
+alias budget=xdg-open\ ~/Documents/money/budget.ods
 alias emc="emacsclient -c"
 alias emcview="__emc_view"
 alias firefox=librewolf
@@ -27,3 +26,7 @@ if [ ! -f /tmp/ssh-init ]; then
 fi
 alias tenacity="flatpak run org.tenacityaudio.Tenacity"
 alias venv="__venv | xclip -sel c"
+
+# Local Variables:
+# mode: sh
+# End:
