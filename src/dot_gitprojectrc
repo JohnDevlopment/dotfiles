@@ -48,7 +48,8 @@ alias _gs='git status; history -s git status'
 if which commit > /dev/null; then
     ## usage: __temporary_input_file [INITIAL-INPUT]
     function __temporary_input_file {
-	local commitfile=$(mktemp -t COMMIT-MSG-XXX)
+	local commitfile
+	commitfile=$(mktemp -t COMMIT-MSG-XXX)
 
 	# Add initial input to the file
 	local input="$1"
@@ -67,9 +68,17 @@ if which commit > /dev/null; then
     ## usage: __commit-do TAG [-Can] [-c CONVENTION] FILE
     ## TAG: One of add, refactor, remove, rm, update
     function __commit-do {
-	local convention dry addfile=0 editcommit=0
-	local tag="$1"; shift
-	local usage="usage: commit-$tag [-Can] [-c CONVENTION] [--] FILE"
+	local convention dry addfile editcommit ; # flags and options
+	local file tag ;# positional arguments
+
+	local usage
+	usage="usage: commit-$tag [-Can] [-c CONVENTION] [--] FILE"
+
+	tag="$1"; shift
+
+	# flag defaults
+	addfile=0
+	editcommit=0
 
 	local opt
 	OPTIND=1
@@ -101,9 +110,12 @@ if which commit > /dev/null; then
 		    return 1
 	    esac
 	done
+	shift $(( OPTIND - 1 ))
+	OPTIND=1
 
 	# Positional arguments
-	local file="$2"
+	local file
+	file="$1"
 
 	# Missing or incorrect args
 	if [ -z "$tag" ]; then
@@ -114,7 +126,8 @@ if which commit > /dev/null; then
 	    return 1
 	elif [[ ! $tag =~ add|r(e(factor|move)|m)|update ]]; then
 	    # Uses a regular expression to see if TAG is valid
-	    __error -f __commit-do "Internal error; Invalid tag '$tag', must be one of add, refactor, remove, rm, or update"
+	    local temp='add, refactor, remove, rm, or update'
+	    __error -f __commit-do "Internal error; Invalid tag '$tag', must be one of $temp"
 	    return 1
 	fi
 
@@ -126,20 +139,38 @@ if which commit > /dev/null; then
 
 	case $tag in
 	    add)
-		# Is file added to index?
-		local added
-		added=$(porcelain | grep '^A ' | sed -E 's/^.. (.+)/\1/')
+		local status pattern
+		status=$(porcelain | grep "$file")
+		if test -z "$status"; then
+		    __error -f commit-$tag "${file@Q} not in working tree"
+		    return 1
+		fi
 
 		if [ $addfile -eq 0 ]; then
-		    if ! grep "$file" <<<"$added" &> /dev/null; then
-			echo "${file@Q} not added to index"
+		    pattern='^(A |\?\?)'
+		    if [[ ! $status =~ $status ]]; then
+			__error -f commit-$tag "${file@Q} does not exist in the working tree," \
+				"untracked or otherwise"
 			return 1
 		    fi
 		else
-		    git add "$file" || {
-			__error -f commit-add "Could not add ${file@Q} to index"
-			return 1
-		    }
+		    # -a was provided
+		    status=$(porcelain | grep "$file" 2> /dev/null)
+		    case $status in
+			??*)
+			    # Completely untracked
+			    git add "$file" || {
+				__error -f commit-$tag "Could not add ${file@Q} to index"
+				return 1
+			    }
+			    ;;
+			A*)
+			    echo "Already added ${file@Q} to index"
+			    ;;
+			*)
+			    __error -f commit-$tag "Invalid status: $status"
+			    return 1
+		    esac
 		fi
 
 		# -C lets the user edit the commit message
@@ -158,19 +189,43 @@ if which commit > /dev/null; then
 		msg="$file"
 		;;
 	    refactor|update)
+		# good:
+		#   * " M" -- updated in working tree; not added to index
+		#   * "M " -- modified; added to index
+		local status
+		status=$(porcelain | grep "$file")
+		test -n "$status" || {
+		    # __error -f commit-$tag "Internal error; \$status is empty"
+		    __error -f commit-$tag "${file@Q} not updated in working tree"
+		    return 1
+		}
+
+		# if [[ ! $status =~ ^.M ]]; then
+		#     __error -f commit-$tag "${file@Q} not updated in working tree"
+		#     return 1
+		# fi
+
 		if [ $addfile -eq 0 ]; then
-		    # good:
-		    #   * " M" -- updated in working tree; not added to index
-		    #   * "M " -- modified; added to index
-		    if ! (porcelain | grep -E "^MM" &> /dev/null); then
-			__error -f commit-$tag "Updated $file not added to index"
+		    if [[ ! $status =~ ^MM ]]; then
+			__error -f commit-$tag "${file@Q} has not been added to the index"
 			return 1
 		    fi
 		else
-		    git add "$file" || {
-			__error -f commit-$tag "Could not add ${file@Q} to index"
-			return 1
-		    }
+		    __dprint "Adding ${file@Q}"
+		    status=$(porcelain | grep "$file" 2> /dev/null)
+		    pattern="^([M ])M $file"
+		    if [[ $status =~ $pattern ]]; then
+			if [ "${BASH_REMATCH[1]}" = " " ]; then
+			    # Not added to index
+			    git add "$file" || {
+				__error -f commit-$tag "Could not add ${file@Q} to index"
+				return 1
+			    }
+			else
+			    # Already added to index
+			    __error -f commit-$tag "${file@Q} already added to index"
+			fi
+		    fi
 		fi
 
 		# -C lets the user edit the commit message
@@ -188,11 +243,51 @@ if which commit > /dev/null; then
 	esac
 
 	# Both -a and -n are passed
-	if [[ $addfile != 0 && -n "$dry" ]]; then
+	if [[ $addfile != 0 && -n $dry ]]; then
 	    git reset
 	fi
 
-	${dry:-eval} commit ${convention:+-c $convention} -t $tag -m "${msg@Q}"
+	${dry:-eval} commit ${convention:+-c $convention} -t $tag -m "${msg@Q}" -ct -
+    }
+
+    ## usage: commit-add-all [-Can] [-c CONVENTION] TAG FILE...
+    function commit-all {
+	local opts=()
+	OPTIND=1
+	while getopts :Cac:n OPT; do
+	    case $OPT in
+		C)
+		    opts+=(-C)
+		    ;;
+		a)
+		    opts+=(-a)
+		    ;;
+		c)
+		    opts+=(-c "$OPTARG")
+		    ;;
+		n)
+		    opts+=(-n)
+		    ;;
+		*)
+		    echo "usage: ${0##*/} [-Cacn} [--] TAG FILE..."
+		    return 2
+	    esac
+	done
+	shift $(( OPTIND - 1 ))
+	OPTIND=1
+
+	local tag=${1:?missing TAG}
+	local file=${2:?missing FILE}
+	shift 2
+
+	local answer
+	for file in "$file" "$@"; do
+	    read -r -n 1 -p "\$ __commit-do $tag ${opts[*]@Q} ${file@Q} \$ [y/n] " answer
+	    echo
+	    if [ "$answer" = "y" ]; then
+		__commit-do $tag "${opts[@]}" "$file"
+	    fi
+	done
     }
 
     if [ "$MODE" = "python" ]; then
