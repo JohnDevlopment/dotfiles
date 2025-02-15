@@ -131,12 +131,6 @@ if which commit > /dev/null; then
 	    return 1
 	fi
 
-	# -a adds the file to the index
-	if [ $addfile -ne 0 ]; then
-	    __dprint "Adding $file to index..."
-	    env -C $ROOT git add $file || return 1
-	fi
-
 	case $tag in
 	    add)
 		local status pattern
@@ -419,3 +413,7 @@ EOF
 }
 
 list-commands
+
+# Local Variables:
+# flycheck-shellcheck-excluded-warnings: ("SC2086")
+# End:

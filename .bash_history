@@ -1,48 +1,3 @@
-_gs
-chezmoi apply ~/src/.gitprojectrc
-man mktemp
-man head
-chezmoi apply ~/src/.gitprojectrc
-trie add rm remove refactor update
-chezmoi apply ~/src/.gitprojectrc
-source ~/src/.gitprojectrc
-__commit-do add
-__commit-do remove
-for tag in add refactor remove rm update; do __commit-do $tag; done
-chezmoi apply ~/src/.gitprojectrc
-ll
-source ~/src/.gitprojectrc
-_gs
-commit-add -na dot_bash_aliases
-_gs
-__added
-type __added
-git status --porcelain
-chezmoi apply ~/src/.gitprojectrc
-git reset
-chezmoi apply ~/src/.gitprojectrc
-git status --porcelain
-chezmoi apply ~/src/.gitprojectrc
-source ~/src/.gitprojectrc
-git status --porcelain
-_gs
-git add dot_bash_aliases
-git status --porcelain
-git reset
-chezmoi apply ~/src/.gitprojectrc
-source ~/src/.gitprojectrc
-__added_or_modified
-chezmoi apply ~/src/.gitprojectrc; source ~/src/.gitprojectrc
-__added_or_modified
-echo ${GIT_ADDED_MODIFIED[@]}
-echo ${#GIT_ADDED_MODIFIED[@]}
-chezmoi apply ~/src/.gitprojectrc; source ~/src/.gitprojectrc
-__modified 
-git status --porcelain
-__modified
-git reset
-chezmoi apply ~/src/.gitprojectrc; source ~/src/.gitprojectrc
-porcelain
 git add dot_bash_aliases 
 porcelain
 chezmoi apply ~/src/.gitprojectrc; source ~/src/.gitprojectrc
@@ -497,4 +452,49 @@ cat src/dot_gitprojectrc
 cat -l bash src/dot_gitprojectrc
 exit
 git status
+exit
+chezmoi status
+sshinit
+chezmoi merge-all
+git status
+git reset --hard HEAD
+git log --oneline
+git push
+chezmoi status
+ll
+emacsclient -c .chezmoi.toml.tmpl
+chezmoi init
+chezmoi status
+chezmoi add ~/.bash_aliases
+gitk
+clear
+git log --oneline
+git status
+chezmoi status
+chezmoi merge .config/awesome/rc.lua
+chezmoi merge ~/.config/awesome/rc.lua
+chezmoi status
+chezmoi diff
+chezmoi diff | cat -l diff
+chezmoi status
+alias chzs="chezmoi status"
+chzs
+chezmoi diff ~/.config/awesome/rc.lua
+chezmoi ~/.config/awesome/rc.lua
+chezmoi add ~/.config/awesome/rc.lua
+git status
+chzs
+chezmoi apply ~/.config/awesome/rc.lua
+chzs
+chezmoi diff ~/.config
+chezmoi forget ~/bin/git-fixup-gui
+chzs
+chezmoi forget ~/bin/git-gui-commit
+chezmoi forget ~/bin/ssh-agent.sh
+git log --oneline
+git status
+chzs
+chezmoi merge ~/src/.gitprojectrc
+git log --oneline
+git push
 exit
