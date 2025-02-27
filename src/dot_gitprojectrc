@@ -119,7 +119,7 @@ if which commit > /dev/null; then
 
 	# Missing or incorrect args
 	if [ -z "$tag" ]; then
-	    __error -f __commit-do "Missing tag\n$usage"
+	    __error -f __commit-do "Internal error; Missing tag\n$usage"
 	    return 1
 	elif [ -z "$file" ]; then
 	    __error -f commit-$tag "Missing file\n$usage"
@@ -285,6 +285,8 @@ if which commit > /dev/null; then
     }
 
     if [ "$MODE" = "python" ]; then
+	commit_dep_usage='commit-dep [-d] DEPENDENCY'
+
 	## usage: commit-dep [-d] DEPENDENCY
 	function commit-dep {
 	    local answer D N
@@ -314,11 +316,13 @@ if which commit > /dev/null; then
 	    $N commit -t project -m "Add ${dependency}$D" -ct -
 	}
     else
+	commit_dep_usage='commit-dep DEPENDENCY'
+
 	# Generic behavior
-	## usage: commit-dep [-d] DEPENDENCY
+	## usage: commit-dep DEPENDENCY
 	function commit-dep {
 	    local dependency=${1:?missing DEPENDENCY}
-	    $N commit -t project -m "Add $dependency"
+	    commit -t project -m "Add $dependency"
 	}
     fi
 
@@ -352,6 +356,7 @@ if which commit > /dev/null; then
     alias commit-add="__commit-do add"
     alias commit-refactor="__commit-do refactor"
     alias commit-rm="__commit-do rm"
+    alias commit-remove="__commit-do remove"
     alias commit-update="__commit-do update"
 fi
 
@@ -367,11 +372,11 @@ function __dprint {
 }
 
 function __gitoff {
-    unalias _fixup _ga _gb _gdiff _gl _gr _gs commit-{add,refactor,rm,update} \
+    unalias _fixup _ga _gb _gdiff _gl _gr _gs commit-{add,refactor,remove,rm,update} \
 	    gitoff porcelain 2> /dev/null
-    unset -f __commit-do __dprint __error __ga __gitoff __temporary_input_file _reword _squash _squash \
-	  format-commit list-commands
-    unset MODE ROOT
+    unset -f __commit-do __dprint __error __gitoff __temporary_input_file _reword _squash \
+	  commit-{all,dep} format-commit
+    unset ROOT
 }
 
 ## usage: __error [-f FUNCTION] ...
@@ -387,32 +392,29 @@ function __error {
     echo -e "${fn:+$fn: }$msg" "$@"
 }
 
-## usage: list-commands
-function list-commands {
-    cat <<EOF
+cat <<EOF
 Gitrc Commands:
   * _fixup COMMIT
   * _reword COMMIT
   * _squash COMMIT
-  * _ga FILE (deprecated)
   * _gb
   * _gl [GIT-LOG-ARGS...]
-  * _grm FILE (deprecated)
   * _gs
   * gitoff
 EOF
-    if which commit > /dev/null; then
-	cat <<EOF
+if which commit > /dev/null; then
+    cat <<EOF
 Commit Commands:
-  * commit-add
-  * commit-refactor
-  * commit-rm
-  * commit-update
+  * commit-add [-Can] [-c CONVENTION] FILE
+  * $commit_dep_usage
+  * commit-refactor [-Can] [-c CONVENTION] FILE
+  * commit-rm [-Can] [-c CONVENTION] FILE
+  * commit-update [-Can] [-c CONVENTION] FILE
+  * format-commit [-c]
 EOF
-    fi
-}
+fi
 
-list-commands
+unset MODE commit_dep_usage
 
 # Local Variables:
 # flycheck-shellcheck-excluded-warnings: ("SC2086")
