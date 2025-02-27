@@ -592,8 +592,13 @@ awful.rules.rules = {
 
     -- Godot
     {
-       rule = { "Godot_Engine" },
+       rule = { class = "Godot_Engine" },
        properties = { floating = true }
+    },
+
+    {
+       rule = { name = "Pomodoro Timer" },
+       properties = { floating = false }
     },
 
     -- Floating clients.
