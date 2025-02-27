@@ -739,7 +739,7 @@ end
 spawn_once("nitrogen --restore", "nitrogen")
 
 spawn_once("psensor")
-spawn_once("redshift-gtk -l 37.01:-94.5 -b 0.85:0.75 -m randr -t 6200:4500 -g 0.9", "redshift")
+spawn_once("redshift-gtk -l 37.01:-94.5 -b 0.9:0.75 -m randr -t 6200:4500 -g 0.9", "redshift")
 spawn_once("blueman-applet", "blueman")
 spawn_once("parcellite")
 spawn_once("betterbird")
