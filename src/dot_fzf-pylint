@@ -1,5 +1,14 @@
 # -*- mode: sh; -*-
 
+PKGDIR="$1"
+
+if [ -z "$PKGDIR" ]; then
+    echo -e "Missing PKGDIR\nusage: source $0 PKGDIR [PKG]"
+    return 1
+fi
+
+PKG=${2:-$PKGDIR}
+
 ## usage: list-python-packages
 function list-python-packages {
     python ~/src/.python-module-tree.py ${PKGDIR} ${PKG}
@@ -8,7 +17,7 @@ function list-python-packages {
 ## usage: __fzf_pylint
 function __fzf_pylint {
     local output=$(
-	(python ~/src/.python-module-tree.py ${PKGDIR} ${PKG} || return 1) | \
+	(python ~/src/.python-module-tree.py "$PKGDIR" "$PKG" || return 1) | \
 	    fzf --height 40% --query "$READLINE_LINE" \
 		--bind ctrl-r:toggle-sort,ctrl-c:clear-query
     )
@@ -25,9 +34,6 @@ function __fzf_pylint {
 # Redraw the prompt when ESC r (Alt-r) is pressed
 bind -m emacs-standard '"\er": redraw-current-line'
 
-PKGDIR="$1"
-PKG="$2"
-
 # Bind Control+r to the following:
 # 1. Control+e: move to the end of the current visual line
 # 2. <prefix> Control+y, ESC+y: yank the second-to-last
@@ -35,4 +41,6 @@ PKG="$2"
 # 3. <prefix> ESC, Control+e: move to the end of the defun
 bind -m emacs-standard '"\C-l": "\C-e \C-u\C-y\ey\C-u"$(__fzf_pylint)"\e\C-e\er"'
 
-echo "Pylint completion with fzf bound to Control l for package $2"
+bind '"\C-xl": clear-screen'
+
+echo "Pylint completion with fzf bound to Control l for package ${PKG@Q}"
