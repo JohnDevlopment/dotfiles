@@ -71,8 +71,10 @@ function __venv {
     local cmd="source"
     if [ -d ".venv" ]; then
 	echo -en "$cmd .venv/bin/activate"
+	history -s $cmd .venv/bin/activate
     elif [ -d ".env" ]; then
 	echo -en "$cmd .env/bin/activate"
+	history -s $cmd .env/bin/activate
     else
 	echo "no .venv or .env directory present" >&2
 	false
@@ -106,12 +108,12 @@ function subshell {
     local RM=$(which rm)
 
     # Usage
-    local USAGE="usage: subshell [-H] [-i INPUTFILE]
+    local USAGE="usage: subshell [-H] [-i INPUTFILE] [-C DIR]
        subshell -h"
 
     # Parse options
-    local OPT OPTARG OPTIND input history=1 dry=0
-    while getopts :Hhi:n OPT; do
+    local OPT OPTARG OPTIND input history=1 dry=0 C
+    while getopts :C:Hhi:n OPT; do
 	case $OPT in
 	    H)
 		history=0
@@ -119,11 +121,15 @@ function subshell {
 	    i)
 		input="$OPTARG"
 		;;
+	    C)
+		C="$OPTARG"
+		;;
 	    n)
 		dry=1
 		;;
 	    h)
 		echo "$USAGE"
+		return
 		;;
 	    *)
 		echo "$USAGE" >&2
@@ -147,6 +153,15 @@ SUBSHELL_PROMPT=subshell
 PS1="(\$SUBSHELL_PROMPT) \$PS1"
 export PS1
 EOF
+
+    if [ -n "$C" ]; then
+	if [ -d "$C" ]; then
+	    echo "cd ${C@Q} || exit 1"
+	else
+	    echo "${C@Q} does not exist or is not a directory" >&2
+	    return 1
+	fi
+    fi
 
     if [ $history -eq 0 ]; then
 	# -H flag is set
@@ -480,6 +495,20 @@ EOS
     if [ $move -ne 0 ]; then
 	delete -v "$1"
     fi
+}
+
+## usage: initgo
+function initgo {
+    local gopath
+    gopath=$(env PATH="$PATH:/usr/local/go/bin" go env GOPATH)
+    PATH="$PATH:/usr/local/go/bin:${gopath}/bin"
+    unset -f initgo
+}
+
+## usage: nohistory
+function nohistory {
+    HISTFILE=/dev/null
+    unset -f nohistory
 }
 
 # Local variables:
