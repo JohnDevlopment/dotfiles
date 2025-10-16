@@ -103,7 +103,8 @@ history_filter = [
     "^git commit --(fixup|squash).*",
     "^__[a-zA-Z].*",
     "^(for|if|while) .*",
-    "^git remote [gs]et-url .*"
+    "^git remote [gs]et-url .*",
+    "^devpi (login|user).*"
 ]
 
 ## prevent commands run with cwd matching any of these regexes from being written
