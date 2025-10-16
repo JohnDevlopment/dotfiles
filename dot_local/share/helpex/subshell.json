@@ -9,7 +9,8 @@
 	    "type": "options",
 	    "items": [
 		["-H", "do not read from any history file. Clear the history"],
-		["-i FILE", "load FILE as a Bash script and execute its commands in the current shell"]
+		["-i FILE", "load FILE as a Bash script and execute its commands in the current shell"],
+		["-C DIR", "change the working directory to DIR"]
 	    ]
 	}
     ],
