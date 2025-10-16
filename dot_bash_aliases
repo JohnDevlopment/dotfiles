@@ -1,3 +1,5 @@
+# -*- mode: sh; -*-
+
 alias blesh="unalias blesh; source ~/.local/share/blesh/ble.sh; source ~/.blerc"
 alias cat=bat
 alias delete=$(which rm)
@@ -12,6 +14,7 @@ alias midentify=_midentify
 alias opamload="unalias opamload; eval \$(opam env)"
 alias venv="__venv | xclip -sel c"
 alias sshload="$(ssh-agent.sh) unalias sshload sshinit 2> /dev/null"
+
 if [ ! -f /tmp/ssh-init ]; then
     ## usage: __ssh_init
     function __ssh_init {
@@ -23,7 +26,3 @@ if [ ! -f /tmp/ssh-init ]; then
     }
     alias sshinit="$(ssh-agent.sh) __ssh_init"
 fi
-
-# Local Variables:
-# mode: sh
-# End:
