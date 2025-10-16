@@ -1,0 +1,2 @@
+{{- $choices := list "ADD" "FIX" "FEATURE" "PROJECT" "REFACTOR" "REMOVE" "UPDATE" -}}
+[{{- promptChoice "Tag: " $choices "UPDATE" }}] {{ promptString "File: " -}}
