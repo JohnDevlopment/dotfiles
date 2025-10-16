@@ -500,151 +500,139 @@ root.keys(globalkeys)
 -- {{{ Rules
 -- Rules to apply to new clients (through the "manage" signal).
 awful.rules.rules = {
-    -- All clients will match this rule.
-    { rule = { },
-      properties = { border_width = beautiful.border_width,
-                     border_color = beautiful.border_normal,
-                     focus = awful.client.focus.filter,
-                     raise = true,
-                     keys = clientkeys,
-                     buttons = clientbuttons,
-                     screen = awful.screen.preferred,
-                     placement = awful.placement.no_overlap+awful.placement.no_offscreen
+   -- All clients will match this rule.
+   { rule = { },
+     properties = { border_width = beautiful.border_width,
+		    border_color = beautiful.border_normal,
+		    focus = awful.client.focus.filter,
+		    raise = true,
+		    keys = clientkeys,
+		    buttons = clientbuttons,
+		    screen = awful.screen.preferred,
+		    placement = awful.placement.no_overlap+awful.placement.no_offscreen
      }
-    },
+   },
 
-    -- Custom Rules --
+   -- Custom Rules --
 
-    -- Floating clients centered on screen
-    {
-       rule_any = {
-	  class = { "MPlayer", "vlc", "Godot_ProjectList", "Tk" },
-	  name = { "Yt-dlp Tk Interface", "Dictionary" }
-       },
-       properties = {
-	  floating = true,
-	  placement = awful.placement.centered
-       }
-    },
+   -- Floating clients centered on screen
+   {
+      rule_any = {
+	 class = { "MPlayer", "vlc", "Godot_ProjectList", "Tk" },
+	 name = { "Yt-dlp Tk Interface", "Dictionary" }
+      },
+      properties = {
+	 floating = true,
+	 placement = awful.placement.centered
+      }
+   },
 
-    -- KeePassXC
-    {
-       rule = {
-	  class = "KeePassXC"
-       },
-       properties = {
-	  floating = true,
-	  placement = awful.placement.centered,
-	  sticky = true
-       }
-    },
+   -- KeePassXC
+   {
+      rule = {
+	 class = "KeePassXC"
+      },
+      properties = {
+	 floating = true,
+	 placement = awful.placement.centered,
+	 sticky = true
+      }
+   },
 
-    -- Betterbird
-    -- On the fourth tag, tiled
-    {
-       rule = {
-	  class = "eu.betterbird.Betterbird"
-       },
-       properties = {
-	  tag = "4",
-	  floating = false
-       }
-    },
-    -- Floating client for "sending message" window
-    {
-       rule = {
-	  class = "eu.betterbird.Betterbird",
-	  name = "Sending Message"
-       },
-       properties = {
-	  floating = true
-       }
-    },
+   -- Betterbird
+   -- On the fourth tag, tiled
+   {
+      rule = {
+	 class = "eu.betterbird.Betterbird"
+      },
+      properties = {
+	 tag = "4",
+	 floating = false
+      }
+   },
+   -- Floating client for "sending message" window
+   {
+      rule = {
+	 class = "eu.betterbird.Betterbird",
+	 name = "Sending Message"
+      },
+      properties = {
+	 floating = true
+      }
+   },
 
-    -- Firefox
-    -- On the second tag, tiled
-    {
-       rule = { class = "firefox" },
-       properties = {
-	  tag = "2",
-	  floating = false
-       }
-    },
+   -- Librewolf
+   {
+      rule = { class = "librewolf" },
+      properties = {
+	 tag = "2",
+	 floating = false
+      }
+   },
 
-    -- Librewolf
-    {
-       rule = { class = "LibreWolf" },
-       properties = {
-	  tag = "2",
-	  floating = false
-       }
-    },
+   -- Brave Browser
+   -- On the third tag, tiled
+   {
+      rule_any = { class = "brave-browser", "Brave-browser" },
+      properties = {
+	 tag = "3",
+	 floating = false
+      }
+   },
 
-    -- Brave Browser
-    -- On the third tag, tiled
-    {
-       rule = { class = "brave" },
-       properties = {
-	  tag = "3",
-	  floating = false
-       }
-    },
+   -- Godot
+   {
+      rule = { class = "Godot_Engine" },
+      properties = { floating = true }
+   },
 
-    -- Godot
-    {
-       rule = { class = "Godot_Engine" },
-       properties = { floating = true }
-    },
-
-    {
-       rule = { name = "Pomodoro Timer" },
-       properties = { floating = false }
-    },
-
-    -- Floating clients.
-    { rule_any = {
+   -- Floating clients.
+   { rule_any = {
         instance = {
-          "DTA",  -- Firefox addon DownThemAll.
-          "copyq",  -- Includes session name in class.
-          "pinentry",
+	   "DTA",  -- Firefox addon DownThemAll.
+	   "copyq",  -- Includes session name in class.
+	   "pinentry",
         },
         class = {
-          "Arandr",
-          "Blueman-manager",
-	  "Gnote",
-          "Gpick",
-          "Kruler",
-	  "KeePassXC",
-          "MessageWin",  -- kalarm.
-	  "Psensor", -- Psensor applet
-	  "Picture in picture",
-          "Sxiv",
-          "Tor Browser", -- Needs a fixed window size to avoid fingerprinting by screen size.
-          "Wpa_gui",
-          "veromix",
-          "xtightvncviewer"
+	   "Arandr",
+	   "Blueman-manager",
+	   "Gnome-calculator",
+	   "Gnote",
+	   "Gpick",
+	   "KeePassXC",
+	   "Kruler",
+	   "MessageWin",  -- kalarm.
+	   "Picture in picture",
+	   "Psensor", -- Psensor applet
+	   "Sxiv",
+	   "Tor Browser", -- Needs a fixed window size to avoid fingerprinting by screen size.
+	   "Wpa_gui",
+	   "gnome-calculator",
+	   "veromix",
+	   "xtightvncviewer"
 	},
 
         -- Note that the name property shown in xprop might be set slightly after creation of the client
         -- and the name shown there might not match defined rules here.
         name = {
 	   "Event Tester",  -- xev.
-	   "Picture in picture"
+	   "Picture in picture",
+	   "Pomodoro Timer"
         },
         role = {
-          "AlarmWindow",  -- Thunderbird's calendar.
-          "ConfigManager",  -- Thunderbird's about:config.
-          "pop-up",       -- e.g. Google Chrome's (detached) Developer Tools.
+	   "AlarmWindow",  -- Thunderbird's calendar.
+	   "ConfigManager",  -- Thunderbird's about:config.
+	   "pop-up",       -- e.g. Google Chrome's (detached) Developer Tools.
         }
-      }, properties = { floating = true }},
+   }, properties = { floating = true }},
 
-    -- Add titlebars to normal clients and dialogs
-    {
-       rule_any = {
-	  type = { "normal", "dialog" }
-       },
-       properties = { titlebars_enabled = true }
-    }
+   -- Add titlebars to normal clients and dialogs
+   {
+      rule_any = {
+	 type = { "normal", "dialog" }
+      },
+      properties = { titlebars_enabled = true }
+   }
 }
 -- }}}
 
