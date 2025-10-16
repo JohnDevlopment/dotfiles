@@ -25,6 +25,18 @@ done
 
 ### COMMANDS
 
+## usage: _gc
+function _gc {
+    local branch
+    branch=$(git branch | grep -v '^\*' | fzf)
+
+    if [[ -n "$branch" ]]; then
+	git checkout $branch
+    else
+        echo "No branch selected."
+    fi
+}
+
 ## usage: _reword COMMIT
 function _reword {
     git commit --fixup reword:${1:?missing COMMIT}
@@ -37,7 +49,15 @@ function _squash {
     history -s git commit --squash $commit
 }
 
-alias _fixup='git commit --fixup; history -s git commit --fixup'
+## usage: _fixup REVISION
+function _fixup {
+    local revision
+    revision=${1:?missing REVISION}
+
+    git commit --fixup "${revision:?empty}"
+    history -s git commit --fixup "$revision"
+}
+
 alias _gb="git branch; history -s git branch"
 alias _gdiff='git difftool --dir-diff; history -s git difftool --dir-diff'
 alias gitoff=__gitoff
@@ -200,7 +220,9 @@ if which commit > /dev/null; then
 		# fi
 
 		if [ $addfile -eq 0 ]; then
-		    if [[ ! $status =~ ^MM ]]; then
+		    local regex
+		    regex='^M '
+		    if [[ ! $status =~ $regex ]]; then
 			__error -f commit-$tag "${file@Q} has not been added to the index"
 			return 1
 		    fi
@@ -308,12 +330,48 @@ if which commit > /dev/null; then
 
 	    local dependency=${1:?missing DEPENDENCY}
 
-	    read -p 'Add pyproject.toml and poetry.lock? [y/n] ' answer
+	    read -p 'Add pyproject.toml? [y/n] ' answer
 	    if [ "$answer" = "y" ]; then
-		git add pyproject.toml poetry.lock
+		git add pyproject.toml || return $?
+	    fi
+
+	    if [ -f "uv.lock" ]; then
+		read -p 'Add uv.lock? [y/n] ' answer
+		if [ "$answer" = "y" ]; then
+		    git add uv.lock || {
+			local code=$?
+			git reset
+			return $code
+		    }
+		fi
+	    fi
+
+	    if [ -f "poetry.lock" ]; then
+		read -p 'Add poetry.lock? [y/n] ' answer
+		if [ "$answer" = "y" ]; then
+		    git add poetry.lock || {
+			local code=$?
+			git reset
+			return $code
+		    }
+		fi
 	    fi
 
 	    $N commit -t project -m "Add ${dependency}$D" -ct -
+	}
+
+	commit_version_usage='commit-version VERSION'
+
+	## usage: commit-version VERSION
+	function commit-version {
+	    local version
+	    version="$1"
+	    if [ -z "$version" ]; then
+		echo "missing VERSION" >&2
+		return 1
+	    fi
+
+	    $N commit -t project -m "Bump to version $version" -ct -
 	}
     else
 	commit_dep_usage='commit-dep DEPENDENCY'
@@ -372,7 +430,7 @@ function __dprint {
 }
 
 function __gitoff {
-    unalias _fixup _ga _gb _gdiff _gl _gr _gs commit-{add,refactor,remove,rm,update} \
+    unalias _fixup _ga _gb _gc _gdiff _gl _gr _gs commit-{add,refactor,remove,rm,update} \
 	    gitoff porcelain 2> /dev/null
     unset -f __commit-do __dprint __error __gitoff __temporary_input_file _reword _squash \
 	  commit-{all,dep} format-commit
@@ -398,10 +456,17 @@ Gitrc Commands:
   * _reword COMMIT
   * _squash COMMIT
   * _gb
+  * _gc
+  * _gdiff
   * _gl [GIT-LOG-ARGS...]
   * _gs
   * gitoff
 EOF
+
+if [ -n "$commit_version_usage" ]; then
+    commit_version_usage=$(printf "\n  * $commit_version_usage")
+fi
+
 if which commit > /dev/null; then
     cat <<EOF
 Commit Commands:
@@ -409,12 +474,12 @@ Commit Commands:
   * $commit_dep_usage
   * commit-refactor [-Can] [-c CONVENTION] FILE
   * commit-rm [-Can] [-c CONVENTION] FILE
-  * commit-update [-Can] [-c CONVENTION] FILE
+  * commit-update [-Can] [-c CONVENTION] FILE${commit_version_usage}
   * format-commit [-c]
 EOF
 fi
 
-unset MODE commit_dep_usage
+unset MODE commit_dep_usage commit_version_usage
 
 # Local Variables:
 # flycheck-shellcheck-excluded-warnings: ("SC2086")
