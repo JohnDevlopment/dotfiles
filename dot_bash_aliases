@@ -3,7 +3,6 @@ alias cat=bat
 alias delete=$(which rm)
 alias dquilt="quilt --quiltrc=${HOME}/.quiltrc-dpkg"
 alias dtail='sudo docker logs -tf --tail="50" "$@"'
-alias budget=xdg-open\ ~/Documents/money/budget.ods
 alias emc="emacsclient -c"
 alias emcview="__emc_view"
 alias firefox=librewolf
@@ -11,21 +10,19 @@ alias ll-dirsizes='lsdirs -q | while read dir; do du -sh "$dir"; done'
 alias ll-sizes="ll -h | awk '{ print \$5, \$9; }' | tail -n +4 | sort -h | column -t -s ' '"
 alias midentify=_midentify
 alias opamload="unalias opamload; eval \$(opam env)"
+alias venv="__venv | xclip -sel c"
 alias sshload="$(ssh-agent.sh) unalias sshload sshinit 2> /dev/null"
 if [ ! -f /tmp/ssh-init ]; then
     ## usage: __ssh_init
     function __ssh_init {
 	if ssh-add; then
-	    unalias sshinit 2> /dev/null
-	    unalias sshinit 2> /dev/null
+	    unalias sshinit sshload 2> /dev/null
 	    unset -f __ssh_init
 	    touch /tmp/ssh-init
 	fi
     }
     alias sshinit="$(ssh-agent.sh) __ssh_init"
 fi
-alias tenacity="flatpak run org.tenacityaudio.Tenacity"
-alias venv="__venv | xclip -sel c"
 
 # Local Variables:
 # mode: sh
