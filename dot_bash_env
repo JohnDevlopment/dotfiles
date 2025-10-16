@@ -35,3 +35,12 @@ FIND_REGEX_TYPE="posix-extended"
 # Useful for Git commands
 export GITHUB_USERNAME
 GITHUB_USERNAME=JohnDevlopment
+
+export HISTIGNORE
+HISTIGNORE="devpi user *:devpi login *:devpi index -c*"
+
+INFOPATH="$HOME/.local/info:${INFOPATH}"
+
+export KROKI_ENDPOINT KROKI_TIMEOUT
+KROKI_ENDPOINT="http://localhost:5013"
+KROKI_TIMEOUT=30s
