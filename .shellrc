@@ -40,6 +40,8 @@ alias git-gui="execnohup --sleep 2 -n 2 git gui; unalias git-gui; history -s exe
 export VISUAL
 VISUAL=emacsclient-gui
 
+alias chz-changed-files="chezmoi diff | grep -E '^diff'"
+
 cat <<EOS
 Commands:
   * emacs (once, modifies history)
