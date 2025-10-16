@@ -19,6 +19,11 @@ def print_tree(directory: Path, prefix: str) -> None:
     PREFIX is changed during each recursion, but its initial
     value should be the name of the package itself.
     """
+    RX = re.compile(r'\\..*')
+
+    if prefix:
+        prefix += "."
+
     # Get the list of all files and directories
     def _filter(x: Path) -> bool:
         """
@@ -26,7 +31,7 @@ def print_tree(directory: Path, prefix: str) -> None:
         """
         return (
             (x.is_file() and x.suffix[1:] == "py") or
-            x.is_dir()
+            (x.is_dir() and RX.match(str(x)))
         )
     # These iterators filter out anything that isn't a directory or Python
     # source file
@@ -42,7 +47,7 @@ def print_tree(directory: Path, prefix: str) -> None:
             print(new_prefix)
             print_tree(item, new_prefix)
         else:
-            print(f"{prefix}.{item.stem}")
+            print(prefix + item.stem)
 
 def parse_arguments() -> tuple[Path, str]:
     """
@@ -56,6 +61,6 @@ def parse_arguments() -> tuple[Path, str]:
 
     return args.package_dir, args.package_name
 
-package_dir, package_name = parse_arguments()
-
-print_tree(package_dir, package_name)
+if __name__ == '__main__':
+    package_dir, package_name = parse_arguments()
+    print_tree(package_dir, package_name)
