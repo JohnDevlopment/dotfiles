@@ -19,18 +19,11 @@
 [guitool "Commit/Default Convention"]
 	cmd = mate-terminal -x ~/programming/Shell/commit-git-gui
 	noconsole = yes
+[guitool "Commit/Default Convention (GUI)"]
+	cmd = ~/src/commit.py
+	noconsole = yes
 [guitool "Commit/Git Fixup"]
 	cmd = git fixup-gui
 	needsfile = yes
-[guitool "Commit/Add File"]
-	cmd = git-gui-commit add "$FILENAME"
-	needsfile = yes
-[guitool "Commit/Update File"]
-	cmd = git-gui-commit update "$FILENAME"
-	needsfile = yes
-[guitool "Commit/Remove File"]
-	cmd = git-gui-commit remove "$FILENAME"
-	needsfile = yes
-[guitool "Commit/Refactor File"]
-	cmd = git-gui-commit refactor "$FILENAME"
-	needsfile = yes
+[diff "gunzip"]
+	textconv = gunzip -c
