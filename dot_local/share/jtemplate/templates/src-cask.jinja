@@ -1,0 +1,13 @@
+{% extends "src.jinja" %}
+
+{% block init %}
+PATH="$HOME/.cask/bin:$PATH"
+{% endblock %}
+
+{% block history %}
+{{ super() }}
+{% endblock %}
+
+{% block listcommands %}
+{{ super() }}
+{% endblock %}
