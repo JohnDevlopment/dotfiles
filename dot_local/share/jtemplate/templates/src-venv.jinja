@@ -1,0 +1,107 @@
+{% extends "src.jinja" %}
+
+{% block init %}
+{{- prompt("package", "Package: ") -}}
+if [ -z "$VIRTUAL_ENV_PROMPT" ]; then
+    source .venv/bin/activate
+fi
+
+  {% set title = prompt_return("Title %d: ", default="<undefined>") %}
+alias reset_prompt='PS1="$OLD_PS1"'
+OLD_PS1="$PS1"
+  {% if title != "<undefined>" %}
+PS1="($VIRTUAL_ENV_PROMPT) "'\[\e]0;'{{ title | quote }}'\a\]\[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\W\[\033[00m\]\$ '
+  {% else %}
+PS1="($VIRTUAL_ENV_PROMPT) "'\[\e]0;\u@\h:\W\a\]\[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\W\[\033[00m\]\$ '
+  {% endif %}
+clear
+{% endblock %}
+
+{% block aliases %}
+{{- super() -}}
+alias rmcache='find -type d -iname __pycache__ -execdir rm -rfv \{} \; 2> /dev/null'
+{{- add_command("rmcache") -}}
+{{- add_command("create-stub") -}}
+{{- add_command("reset_prompt") -}}
+{% endblock +%}
+
+{% block sources %}
+
+source ~/src/.fzf-history
+source ~/src/.gitprojectrc --python
+  {% set package = get("package") %}
+  {% set answer = prompt_return("Add Ruff for {}? %y ".format(package), type_="bool") %}
+  {% if answer %}
+source ~/src/.fzf-ruff-check {{ package }} {{ package }}
+  {% endif %}
+  {% set answer = prompt_return("Add Pylint for {}? %y ".format(package), type_="bool") %}
+  {% if answer %}
+source ~/src/.fzf-pylint {{ package }} {{ package }}
+  {% endif %}
+  {% set answer = prompt_return("Add Pytest for {}? %y ".format(package), type_="bool") %}
+  {% if answer %}
+source ~/src/.fzf-pytest {{ package }}
+{{- prompt("pytest.cov", "Add coverage? %y %d ", type_="bool", default=False) -}}
+    {% if get("pytest.cov") +%}
+alias cov="xdg-open htmlcov/index.html; unalias cov; history -s xdg-open htmlcov/index.html"
+alias pytest-coverage="pytest --cov && coverage html; unalias pytest-coverage; history -s pytest --cov \&\& coverage html"
+{{- add_command("cov", "oh") -}}
+{{- add_command("pytest-coverage", "oh") -}}
+    {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+  {% set answer = prompt_return("Add _test function? %y ", type_="bool") %}
+  {% set package = get("package") %}
+  {% if answer %}
+    {% set answer = prompt_return("Package name %d: ", default=package) %}
+{# submode sh #}
+## usage: _test [MOD] [ARG ...]
+function _test {
+    local mod
+    mod={{ answer }}
+
+    case "$1" in
+        .*)
+            mod="${mod}$1"
+            shift
+            ;;
+        *)
+            :
+    esac
+
+    python -m $mod "$@"
+}
+
+function create-stub {
+    local modules module
+    modules=$(python ~/src/.python-module-tree.py {{ package }} {{ package }} || return 1)
+    module=$(fzf --height 40% --bind ctrl-r:toggle-sort,ctrl-c:clear-query <<<"$modules")
+    test -n "$module" || return 0
+    basedpyright --createstub "$module"
+}
+{# endsubmode #}
+{{- add_command("_test") }}
+  {% endif %}
+  {% set answer = prompt_return("Add find-todo function? %y ", type_="bool") %}
+  {% if answer %}
+    {% set directory = prompt_return("Directory %d: ", default=get("package")) %}
+## usage: find-todo
+function find-todo {
+    find -type f -path {{ concat("*", directory, "/*.py") | quote }} | parallel -X "grep -Hn TODO:"
+}
+  {% endif %}
+  {% set answer = prompt_return("Add find-pattern function? %y ", type_="bool") %}
+  {% if answer %}
+{# submode sh #}
+## usage: find-pattern PATTERN
+function find-pattern {
+    local pattern="${1:?missing PATTERN}"
+    find -type f -path  {{ concat("*", get("functions.find-pattern.directory"), "/*.py") | quote }} | parallel -X "grep -EHn ${pattern@Q}"
+}
+{# endsubmode #}
+  {% endif %}
+{% endblock %}
+
+{% block histfile %}"$VIRTUAL_ENV/.bash_history"{% endblock %}
