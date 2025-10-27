@@ -1,0 +1,19 @@
+BIN = {{- prompt_return("Binary: ") -}}
+
+all: build
+
+build:
+	@go build -o ${BIN} main.go
+
+run: build
+	./${BIN}
+
+install:
+	@go install
+
+test:
+	go test -v main.go
+
+clean:
+	go clean
+	rm ${BIN}
