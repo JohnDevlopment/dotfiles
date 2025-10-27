@@ -1,0 +1,12 @@
+{{ print("Oh, look! It's a baby dinosaur!") }}
+{{- prompt("name", "What's its name? ") -}}
+{{- prompt("age", concat("How old is ", get("name"), "? "), type_="int") -}}
+{% set name = get("name") %}
+{% set age = get("age") %}
+Oh, look! It's a baby dinosaur! Its name is {{ name }} and it is {{ age }}
+{%- if age == 1 %}
+ year 
+{%- else %}
+ years 
+{% endif %}
+{{- " old." }}
