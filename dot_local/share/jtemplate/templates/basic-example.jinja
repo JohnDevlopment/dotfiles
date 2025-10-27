@@ -1,0 +1,13 @@
+{{- prompt("bob.age", "Bob's age %d: ", type_="int", default=25) -}}
+{{- prompt("bob.height", "Bob's height %d: ", default="N/A") -}}
+{{- prompt("bob.tell-likes", "Tell us what Bob likes? %y ", type_="bool") -}}
+Bob's age:	{{ get("bob.age") }}
+Bob's height:	{{ get("bob.height") }}
+{% if get("bob.tell-likes") %}
+{{- prompt_list("bob.likes", "Tell us what Bob likes.", "What: ", ("Score: ", "int")) -}}
+{% for likes, score in get("bob.likes") %}
+- Bob likes {{ likes }} with a score of {{ score }}
+{% endfor %}
+{% else %}
+Bob has no likes. So sad.
+{% endif %}
