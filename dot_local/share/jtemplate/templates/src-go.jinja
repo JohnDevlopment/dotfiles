@@ -1,0 +1,12 @@
+{% extends "src.jinja" %}
+
+{% block init %}
+  {% set prefix = prompt_return("Go directory prefix %d: ", default="/usr/local") %}
+gopath=$(env PATH="$PATH:{{ prefix }}/go/bin" go env GOPATH)
+PATH="$PATH:{{ prefix }}/go/bin${gopath:+:$gopath/bin}"
+unset gopath
+  {% set project = prompt_return("Project: ") %}
+alias reset_prompt='PS1="$OLD_PS1"'
+OLD_PS1="$PS1"
+PS1='\[\e]0;Go Project: '{{ project | quote }}'\a\]\[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\W\[\033[00m\]\$ '
+{% endblock %}
