@@ -1,0 +1,25 @@
+{% block head %}
+{{- prompt("handler.stderr.level", "Handler 'stderr' level %d: ", default="INFO") -}}
+{{- prompt("handler.file.enabled", "Enable handler 'file'? %y %d ", type_="bool", default=False) -}}
+  {% if get("handler.file.enabled") %}
+{{- prompt("handler.file.level", "Handler 'file' level %d: ", default="DEBUG") -}}
+{{- prompt("handler.file.backupCount", "Handler 'file' backup count %d: ", type_="int", default=3) -}}
+  {% endif %}
+{% endblock %}
+
+{% block body %}
+  {% set flogger = get("handler.file.enabled") %}
+Formatters:
+  * simple
+  {% if flogger %}
+  * detailed
+  {% endif %}
+
+Handlers:
+  * stderr
+  {% if flogger %}
+  * file
+    * backup count: {{ get("handler.file.backupCount") }}
+    * max file size: 30720 bytes
+  {% endif %}
+{% endblock %}
