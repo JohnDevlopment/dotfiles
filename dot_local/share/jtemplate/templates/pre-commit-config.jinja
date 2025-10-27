@@ -1,0 +1,31 @@
+{{ prompt("hook.trailw", "trailing whitespace? %y %d ", type_="bool", default=False) }}
+{{ prompt("hook.eoffix", "end-of-file fixer? %y %d ", type_="bool", default=False) }}
+{{ prompt("hook.chklarge", "check added large files? %y %d ", type_="bool", default=False) }}
+{{ prompt("hook.chkast", "check ast? %y %d ", type_="bool", default=False) }}
+{{- prompt("hooks.john", "Add JohnDevlopment hooks? %y %d ", type_="bool", default=False) -}}
+
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.5.0
+  hooks:
+{% if get("hook.trailw") %}
+    - id: trailing-whitespace
+{% endif %}
+{% if get("hook.eoffix") %}
+    - id: end-of-file-fixer
+{% endif %}
+{% if get("hook.chklarge") %}
+    - id: check-added-large-files
+{%- endif %}
+{% if get("hook.chkast") %}
+    - id: check-ast
+{% endif %}
+{% if get("hooks.john") %}
+- repo: https://github.com/JohnDevlopment/pre-commit-hooks
+  rev: v1.0
+  hooks:
+    - id: no-push-wip-commits
+    - id: no-push-squash-commits
+{%- endif %}
