@@ -1,0 +1,56 @@
+{% extends "logging.jinja" %}
+{% block body %}
+  {% set flogger = get("handler.file.enabled") %}
+{
+	"version": 1,
+	"disable_existing_loggers": false,
+	"formatters": {
+  {% if flogger %}
+		"simple": {
+			"format": "%(levelname)s %(name)s %(asctime)s: %(message)s"
+		},
+		"detailed": {
+			"format": "%(levelname)s %(name)s [%(asctime)s] (line %(lineno)d filename %(filename)s): %(message)s",
+			"datefmt": "%Y-%m-%dT%H:%M:%S%z"
+		}
+  {% else %}
+		"simple": {
+			"format": "%(levelname)s %(name)s %(asctime)s: %(message)s"
+		}
+  {% endif %}
+	},
+	"handlers": {
+  {% if flogger %}
+		"stderr": {
+			"class": "logging.StreamHandler",
+			"level": {{ get("handler.stderr.level") | quote }},
+			"formatter": "simple"
+		},
+		"file": {
+			"class": "logging.handlers.RotatingFileHandler",
+			"level": {{ get("handler.file.level") | quote }},
+			"formatter": "detailed",
+			"filename": "{LOG_DIR}/{APPNAME}.log",
+			"backupCount": {{ get("handler.file.backupCount") }},
+			"maxBytes": 30720
+		}
+  {% else %}
+		"stderr": {
+			"class": "logging.StreamHandler",
+			"level": {{ get("handler.stderr.level") | quote }},
+			"formatter": "simple"
+		}
+  {% endif %}
+	},
+	"loggers": {
+		"root": {
+			"level": "DEBUG",
+{% if flogger %}
+			"handlers": ["stderr", "file"]
+{% else %}
+			"handlers": ["stderr"]
+{% endif %}
+		}
+	}
+}
+{% endblock %}
