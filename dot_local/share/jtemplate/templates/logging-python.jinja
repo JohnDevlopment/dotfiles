@@ -1,0 +1,59 @@
+{% extends "logging.jinja" %}
+{% block body %}
+  {% set file_handler = get("handler.file.enabled") %}
+  {% set logger_handlers = ["stderr"] %}
+  {% if file_handler %}
+    {% append logger_handlers "file" %}
+  {% endif %}
+from __future__ import annotations
+
+import logging
+import logging.config
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any
+
+LOG_DIR = Path(__file__).parent / "logs"
+LOGGING_CONFIG: dict[str, Any] = {
+    'disable_existing_loggers': False,
+    'version': 1,
+    'formatters': {
+        'simple': {
+            'format': "%(levelname)s %(name)s %(asctime)s: %(message)s",
+        },
+        'detailed': {
+            'format': "%(levelname)s %(name)s [%(asctime)s] (line %(lineno)d filename %(filename)s): %(message)s",
+            'datefmt': "%Y-%m-%dT%H:%M:%S%z",
+        },
+    },
+    'handlers': {
+        'stderr': {
+            'class': "logging.StreamHandler",
+            'level': {{ get("handler.stderr.level") | quote }},
+            'formatter': "simple",
+            'stream': "ext://sys.stderr",
+        },
+  {% if file_handler %}
+        'file': {
+            'class': "logging.handlers.RotatingFileHandler",
+            'level': {{ get("handler.file.level") | quote }},
+            'formatter': "detailed",
+            'filename': f"{LOG_DIR}/{APPNAME}.log",
+            'backupCount': {{ get("handler.file.backupCount") }},
+            'maxBytes': 30720,
+        },
+  {% endif %}
+    },
+    'loggers': {
+        'root': {
+            'level': "DEBUG",
+            'handlers': {{ logger_handlers }},
+        },
+    },
+}
+
+def setup_logging():
+    logging.config.dictConfig(LOGGING_CONFIG)
+{% endblock %}
