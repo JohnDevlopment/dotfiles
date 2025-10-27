@@ -1,0 +1,48 @@
+{{- prompt("pyversion", "Python Version %d: ", default="3.10") -}}
+
+{% macro diagnostic_setting(name) -%}
+  {% set args = ["none", "hint", "warning", "information", "error"] %}
+  {% set setting = prompt_return("Enable {}? %y ".format(name), type_="bool") %}
+  {% set size = args | length %}
+  {% if setting %}
+    {% for arg in args %}
+{{- print("{}. {}".format(loop.index, arg)) -}}
+    {% endfor %}
+{{- print("{}. true".format(size)) -}}
+    {% set n = prompt_return("Choice %d: ", type_="int", default=size) - 1 %}
+    {% if n < 0 and n > size %}
+{{ "false" -}}
+    {% elif n == size - 1 %}
+{{ "true" -}}
+    {% else %}
+{{ args[n] | quote -}}
+    {% endif %}
+  {% else %}
+{{ "false" -}}
+  {% endif %}
+{%- endmacro %}
+
+{% macro type_checking_mode() %}
+  {% set args = ["off", "basic", "standard", "strict", "recommended", "all"] %}
+  {% set size = args | length %}
+  {% set default = "recommended" %}
+  {% for arg in args %}
+{{- print("{}. {}".format(loop.index, arg)) -}}
+  {% endfor %}
+  {% set n = prompt_return("Type checking mode %d: ", type_="int", default=5) - 1 %}
+  {% if n < 0 and n >= size %}
+{{ default | quote -}}
+  {% else %}
+{{ args[n] | quote -}}
+  {% endif %}
+{% endmacro %}
+
+{# submode json #}
+{
+    "reportMissingImports": {{ diagnostic_setting("reportMissingImports") }},
+    "reportMissingTypeStubs": {{ diagnostic_setting("reportMissingTypeStubs") }},
+    "reportGeneralTypeIssues": {{ diagnostic_setting("reportGeneralTypeIssues") }},
+    "typeCheckingMode": {{ type_checking_mode() }},
+    "pythonVersion": {{ get("pyversion") | quote }}
+}
+{# endsubmode #}
