@@ -1,0 +1,66 @@
+PYTHON ?= python
+SHEBANG ?= "/usr/bin/env -S $(PYTHON) -O"
+VENV ?= 0
+PREFIX ?= ~/.local
+
+{% set ns = namespace(files=[]) -%}
+
+APP := {{ prompt_return("Program Name: ") }}
+MODULE := {{ prompt_return("Module: ") }}
+PIP = $(PYTHON) -m pip
+SOURCE_DIR := {{ prompt_return("Source directory %d: ", default="src") }}
+{{ prompt_list("srcfiles", "Specify the source files.", "File: ") -}}
+{% for filet in get("srcfiles") %}
+  {% set file = filet[0] %}
+{{- ns.files.append(file) or "" -}}
+{% endfor %}
+{# submode gmake #}
+SOURCE_FILES_BASE := {{ ns.files | join(" ") }}
+SOURCE_FILES := $(addprefix $(SOURCE_DIR)/,$(SOURCE_FILES_BASE))
+ZIPAPP = $(PYTHON) -m zipapp
+{# endsubmode #}
+
+{# submode gmake #}
+COMPRESS ?= -c
+MAIN ?= -m "$(MODULE):main"
+
+.PHONY: all clean install-deps
+
+.DEFAULT_GOAL := $(APP)
+
+all: install-deps install uninstall $(APP)
+
+.venv/bin/activate:
+	poetry install
+
+install-deps: .venv/bin/activate $(SOURCE_DIR) requirements.txt
+	. .venv/bin/activate; $(PIP) install -r requirements.txt --target $(SOURCE_DIR)
+	rm -rf $(SOURCE_DIR)/bin/
+
+requirements.txt:
+	. .venv/bin/activate; $(PIP) freeze > requirements.txt
+
+$(APP): $(SOURCE_DIR) $(SOURCE_FILES)
+	. .venv/bin/activate; $(ZIPAPP) $(MAIN) -p $(SHEBANG) $(COMPRESS) -o $(APP) $(SOURCE_DIR)
+
+$(SOURCE_FILES):
+	cp -t $(SOURCE_DIR) $(notdir $@)
+
+$(SOURCE_DIR):
+	mkdir -p $(SOURCE_DIR)
+
+install-manifest.txt:
+	touch install-manifest.txt
+
+install: $(APP) install-manifest.txt
+	truncate -c -s 0 install-manifest.txt
+	cp -t $(PREFIX)/bin/ $(APP)
+	@echo $(PREFIX)/bin/$(APP) > install-manifest.txt
+
+uninstall: install-manifest.txt
+	@while read line; do rm -fv "$$line"; done < install-manifest.txt
+	rm -f install-manifest.txt
+
+clean:
+	@rm -rfv $(APP) requirements.txt $(SOURCE_DIR)/
+{# endsubmode #}
