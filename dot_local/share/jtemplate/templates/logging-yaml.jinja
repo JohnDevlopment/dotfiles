@@ -1,0 +1,36 @@
+{% extends "logging.jinja" %}
+{% block body %}
+version: 1
+disable_existing_loggers: false
+formatters:
+  simple:
+    format: "%(levelname)s %(name)s %(asctime)s: %(message)s"
+  {% if get("handler.file.enabled") %}
+  detailed:
+    format: "%(levelname)s %(name)s [%(asctime)s] (line %(lineno)d filename %(filename)s): %(message)s"
+    datefmt: "%Y-%m-%dT%H:%M:%S%z"
+  {% endif %}
+handlers:
+  stderr:
+    class: logging.StreamHandler
+    level: {{ get("handler.stderr.level") }}
+    formatter: simple
+    stream: ext://sys.stderr
+  {% if get("handler.file.enabled") %}
+  file:
+    class: logging.handlers.RotatingFileHandler
+    level: {{ get("handler.file.level") }}
+    formatter: detailed
+    filename: "{LOG_DIR}/{APPNAME}.log"
+    backupCount: {{ get("handler.file.backupCount") }}
+    maxBytes: 30720
+  {% endif %}
+loggers:
+  root:
+    level: DEBUG
+    handlers:
+      - stderr
+  {% if get("handler.file.enabled") %}
+      - file
+  {% endif %}
+{% endblock %}
