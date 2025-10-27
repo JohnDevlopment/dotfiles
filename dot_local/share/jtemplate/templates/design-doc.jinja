@@ -1,0 +1,26 @@
+#+title: {{- prompt_return("Title: ") -}}
+
+{% set subtitle = prompt_return("Subtitle (optional): ", default="<undefined>") %}
+{%+ if subtitle != "<undefined>" %}
+
+#+subtitle: {{ subtitle }}
+#+latex_class: report
+{% else %}
+
+#+latex_class: report
+{% endif %}
+#+author: John Russell
+#+startup: content
+
+#+begin_abstract
+| Project summary          | {{ prompt_return("Project summary: ") }}          |
+| Intended userbase        | {{ prompt_return("Intended userbase: ") }}        |
+| Problem that this solves | {{ prompt_return("Problem that this solves: ") }} |
+| How it works             | {{ prompt_return("How will it work? ") }}         |
+
+Using the "zoom out, zoom in" approach, explain first in broad terms how the
+application will work.
+#+end_abstract
+
+* User Interface
+* Technical Specification
