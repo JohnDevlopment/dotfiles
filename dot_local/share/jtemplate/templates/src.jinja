@@ -1,0 +1,74 @@
+{# Base template for src #}
+{% block init %}
+
+{% endblock %}
+
+{% set commands = [] %}
+{% macro add_cmdalias(name, command, flags="") %}
+  {% if flags == "oh" or flags == "ho" %}
+    {% set flags = "(once, modifies history)" %}
+  {% elif flags == "o" %}
+    {% set flags = "(once)" %}
+  {% elif flags == "h" %}
+    {% set flags = "(modifies history)" %}
+  {% endif %}
+{{- prompt("cmd.alias", concat("Add command alias \"", name, "\"? %y "), type_="bool") -}}
+  {% if get("cmd.alias") %}
+{# submode sh #}
+alias {{ name }}="{{ command }}; unalias {{ name }}; history -s {{ command }}"
+{# endsubmode #}
+    {% append commands "* {} {}".format(name, flags) %}
+  {% endif %}
+{% endmacro %}
+
+{% macro add_command(name, flags="") %}
+  {% if flags == "oh" or flags == "ho" %}
+    {% set flags = "(once, modifies history)" %}
+  {% elif flags == "o" %}
+    {% set flags = "(once)" %}
+  {% elif flags == "h" %}
+    {% set flags = "(modifies history)" %}
+  {% endif %}
+  {% if flags %}
+    {% append commands "* {} {}".format(name, flags) %}
+  {% else %}
+    {% append commands "* {}".format(name) %}
+  {% endif %}
+{% endmacro %}
+
+{% block aliases %}
+{{- add_cmdalias("emacs", "execnohup emacs", "oh") -}}
+{{- add_cmdalias("git-gui", "execnohup --sleep 2 -n 2 git gui", "oh") -}}
+{{- add_cmdalias("gitk", "execnohup --sleep 2 gitk", "oh") -}}
+{% endblock %}
+
+{% block sources %}
+source ~/src/.gitprojectrc
+source ~/src/.fzf-history
+{% endblock %}
+
+{% block body %}
+
+{% endblock %}
+
+{{- prompt("history.size", "History size %d: ", type_="int", default=500) }}
+{% block history -%}
+history -c
+HISTFILE={% block histfile %}"$ROOTDIR/.bash_history"{% endblock +%}
+HISTSIZE={{ get("history.size") }}
+HISTFILESIZE={{ get("history.size") }}
+export HISTFILE HISTSIZE HISTFILESIZE
+history -r
+{% endblock %}
+
+## usage: list-commands
+function list-commands {
+    cat <<EOF
+Commands:
+{% for command in commands | sort %}
+  {{ command }}
+{% endfor %}
+EOF
+}
+
+list-commands
