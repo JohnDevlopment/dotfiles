@@ -1,5 +1,6 @@
 {{- prompt("package", "Package: ") -}}
 {{- prompt("file", "File to parse %d: ", default="__init__.py") -}}
+{{- file_chmod("u+x") -}}
 #!/usr/bin/env python
 from __future__ import annotations
 
@@ -34,8 +35,9 @@ class RewriteVersion(NodeTransformer):
 
 parent = Path(__file__).parent
 module_file = parent / {{ package | quote }} / {{ get("file") | quote }}
-tree = parse(module_file.read_text())
-tree = RewriteVersion().visit(parse(module_file.read_text()))
+module_text = module_file.read_text()
+tree = parse(module_text)
+tree = RewriteVersion().visit(parse(module_text))
 assert isinstance(tree, AST)
 
 module_file.write_text(unparse(tree) + "\n")
