@@ -1,0 +1,85 @@
+{% block imports %}
+import re
+from dataclasses import dataclass
+from pathlib import Path
+from typing import TYPE_CHECKING, cast
+{% endblock %}
+
+{% block class %}
+@dataclass(frozen=True)
+class FileSize:
+    pattern: ClassVar = re.compile(r'([0-9]+(?:\.[0-9]+)?)(B|[GKMT]b)')
+    multipliers: ClassVar = {
+        'B': 1,
+        'Kb': 1024,
+        'Mb': 1024*1024,
+        'Gb': 1024*1024*1024,
+        'Tb': 1024*1024*1024*1024,
+    }
+
+    size: float
+    unit: Literal['B', 'Kb', 'Mb', 'Gb', 'Tb']
+
+    def __lt__(self, other: FileSize):
+        return self.raw_size < other.raw_size
+
+    def __le__(self, other: FileSize):
+        return self.raw_size <= other.raw_size
+
+    def __gt__(self, other: FileSize):
+        return self.raw_size > other.raw_size
+
+    def __ge__(self, other: FileSize):
+        return self.raw_size >= other.raw_size
+
+    @classmethod
+    def from_string(cls, value: str) -> Self:
+        """
+        Return FileSize from string VALUE.
+
+        VALUE consists of a number (int or float) followed by a unit
+        B, Kb, Mb, Gb, or Tb.
+        """
+        if (m := cls.pattern.fullmatch(value)) is None:
+            raise ValueError(value)     # pragma: no cover
+
+        size = float(m[1])
+        unit = m[2]
+        assert unit in ['B', 'Kb', 'Mb', 'Gb', 'Tb']
+        unit = cast("Literal['B', 'Kb', 'Mb', 'Gb', 'Tb']", unit)
+        return cls(size, unit)
+
+    @classmethod
+    def from_raw_size(cls, raw_size: int) -> Self:
+        """
+        Return a file size object from RAW_SIZE.
+
+        RAW_SIZE is a size measured in bytes.
+        """
+        units: list[Literal['B', 'Kb', 'Mb', 'Gb', 'Tb']] = [
+            "B", "Kb", "Mb", "Gb", "Tb"
+        ]
+        it = iter(units)
+        unit = next(it)
+        f_raw_size = float(raw_size)
+        while f_raw_size > 1024.0:
+            f_raw_size /= 1024.0
+            unit = next(it)
+        return cls(f_raw_size, unit)
+
+    @classmethod
+    def get_file_size(cls, file: Path) -> Self:
+        """
+        Return the size of FILE.
+        """
+        return cls.from_raw_size(file.stat().st_size)
+
+    @property
+    def raw_size(self) -> int:
+        """Raw size in bytes."""
+        multiplier = self.multipliers[self.unit]
+        return int(self.size * multiplier)
+
+    def __str__(self) -> str:
+        return f"{self.size:.2f}{self.unit}"
+{% endblock %}
