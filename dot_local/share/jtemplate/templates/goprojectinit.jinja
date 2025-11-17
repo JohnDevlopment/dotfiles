@@ -1,0 +1,94 @@
+#!/bin/bash
+
+## usage: create-file [-hf] FILE TEXT
+function create-file {
+    local file
+    file="$1"
+    if [ -z "$file" ]; then
+        echo "missing FILE" >&2
+        return 1
+    fi
+
+    local text
+    text="$2"
+    if [ -z "$text" ]; then
+        echo "missing TEXT" >&2
+        return 1
+    fi
+
+    local FORCE
+    FORCE=0
+    while getopts :hf OPT; do
+        case $OPT in
+            h)
+                echo "create-file [-hf] FILE TEXT"
+                return
+                ;;
+            f)
+                FORCE=1
+                ;;
+            *)
+                echo "create-file [-hf] FILE TEXT" >&2
+                return 2
+        esac
+    done
+    shift $(( OPTIND - 1 ))
+    OPTIND=1
+
+    if [[ $FORCE -ne 0 || ! -f $file ]]; then
+        echo "$text" > "$file" && echo "Created $file"
+    fi
+}
+
+{{- prompt("commiter.author", "Author %d: ", default="$GITHUB_USERNAME") -}}
+{{- prompt("cobra.enabled", "Use Cobra? %y ", type_="bool") -}}
+
+{% if get("cobra.enabled") %}
+{{- prompt("cobra.use-viper", "Should viper be included? %y ", type_="bool") -}}
+temp=$(cat <<EOF
+author: {{ get("commiter.author") }}
+license: MIT
+year: $(date +%Y)
+useViper: {{ get("cobra.use-viper") | lower }}
+EOF
+    )
+create-file -f .cobra.yaml "$temp"
+{% endif %}
+
+temp=$(cat <<EOF
+convention: custom
+commit_pattern: "tag message"
+context: false
+EOF
+    )
+create-file commiter.yml "$temp"
+
+temp=$(cat <<EOF
+version: "2"
+linters:
+  default: fast
+  disabled:
+    - gochecknoinits
+    - wsl
+    depguard:
+      rules:
+        main:
+          list-mode: lax
+          allow:
+            - \$gostd
+
+output:
+  formats:
+    json:
+      path: ./lint.json
+    text:
+      path: stderr
+EOF
+    )
+create-file .golangci.yaml "$temp"
+
+{# submode sh #}
+x
+{# endsubmode #}
+
+rm -v $0
