@@ -1,0 +1,7 @@
+{% extends "python_cls-filesize_base.jinja" %}
+{% block imports %}
+{{ super() -}}
+{{ "" }}
+if TYPE_CHECKING:
+    from typing import ClassVar, Literal, Self
+{% endblock %}
